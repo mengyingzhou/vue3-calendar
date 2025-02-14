@@ -6,6 +6,18 @@
 -->
 <template>
   <router-view />
+  <j-bottom />
 </template>
 
-<style lang="less"></style>
+<script lang="ts" setup>
+import JBottom from "@/components/JBottom.vue";
+
+</script>
+
+
+<style lang="less">
+html,
+body{
+    background-color: #ffffff;
+}
+</style>

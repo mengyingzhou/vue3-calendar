@@ -13,6 +13,31 @@ const routes: RouteRecordRaw[] = [
     component: () => import(/* webpackChunkName: "Home" */ "../view/Home.vue"),
   },
   {
+    path: "/profile",
+    name: "Profile",
+    component: () => import(/* webpackChunkName: "Profile" */ "../view/Profile.vue"),
+  },
+  {
+    path: "/star",
+    name: "Star",
+    component: () => import(/* webpackChunkName: "Profile" */ "../view/Star.vue"),
+  },
+  {
+    path: "/follow",
+    name: "Follow",
+    component: () => import(/* webpackChunkName: "Profile" */ "../view/Follow.vue"),
+  },
+  {
+    path: "/selected",
+    name: "Selected",
+    component: () => import(/* webpackChunkName: "Profile" */ "../view/Selected.vue"),
+  },
+  {
+    path: "/contact",
+    name: "Contact",
+    component: () => import(/* webpackChunkName: "Profile" */ "../view/Contact.vue"),
+  },
+  {
     path: "/select",
     name: "Select",
     component: () =>
