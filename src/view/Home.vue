@@ -91,7 +91,7 @@
         <Icon class="showinfo_yili_icon" @click="nextDay(1)" name="arrow" />
       </div>
     </div>
-    <div class="showinfo">
+    <!-- <div class="showinfo">
       <div class="showinfo_yiji">
         <div class="showinfo_yiji_cont">
           <div class="syc_yi">
@@ -177,7 +177,7 @@
           <div class="pzbj_val">{{ dateinfo.pzbj }}</div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 

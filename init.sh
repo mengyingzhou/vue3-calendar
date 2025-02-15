@@ -4,6 +4,28 @@
 sudo apt update
 sudo apt upgrade -y
 
+# install Nginx
+sudo apt install nginx -y
+cp ./nginx.conf /etc/nginx/sites-available/default
+sudo nginx -t
+sudo systemctl reload nginx
+
+# ============ python envir =============
+sudo apt install python3-pip -y
+sudo python3 -m pip config set global.break-system-packages true
+
+# install nodejs and npm
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+node -v   # 查看 Node.js 版本
+npm -v    # 查看 npm 版本
+
+# 记得重新生成新的node_module
+npm install
+
+
+# import mongdb key 
 sudo apt-get install gnupg curl
 curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
    sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
