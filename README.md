@@ -12,11 +12,11 @@
 ### 体验地址
 
 - h5 版:
-  [万年历](http://geeksdidi.gitee.io/v3-calendar/#/)
+  [万年历](http://wentaonism.com)
 
-- 小程序版: (微信扫码)
+- 小程序版: (微信扫码) [TODO]
 
-![gh_28eb17811f61_258](https://github.com/qddidi/vue3-calendar/assets/51770976/5b4707d8-90c6-4934-bd05-e4e179647ee7)
+<!-- ![gh_28eb17811f61_258](https://github.com/qddidi/vue3-calendar/assets/51770976/5b4707d8-90c6-4934-bd05-e4e179647ee7) -->
 
 ### 首页
 
