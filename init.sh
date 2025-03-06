@@ -22,6 +22,7 @@ node -v   # 查看 Node.js 版本
 npm -v    # 查看 npm 版本
 
 # 记得重新生成新的node_module
+rm node_modules -rf
 npm install
 
 
