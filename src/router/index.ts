@@ -1,66 +1,94 @@
-/*
- * @Description:
- * @Date: 2023-05-15 10:35:14
- * @Author: didi
- * @LastEditTime: 2023-05-17 14:13:05
- */
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-
-const routes: RouteRecordRaw[] = [
-  {
-    path: "/",
-    name: "Home",
-    component: () => import(/* webpackChunkName: "Home" */ "../view/Home.vue"),
-  },
-  {
-    path: "/profile",
-    name: "Profile",
-    component: () => import(/* webpackChunkName: "Profile" */ "../view/Profile.vue"),
-  },
-  {
-    path: "/star",
-    name: "Star",
-    component: () => import(/* webpackChunkName: "Profile" */ "../view/Star.vue"),
-  },
-  {
-    path: "/follow",
-    name: "Follow",
-    component: () => import(/* webpackChunkName: "Profile" */ "../view/Follow.vue"),
-  },
-  {
-    path: "/selected",
-    name: "Selected",
-    component: () => import(/* webpackChunkName: "Profile" */ "../view/Selected.vue"),
-  },
-  {
-    path: "/contact",
-    name: "Contact",
-    component: () => import(/* webpackChunkName: "Profile" */ "../view/Contact.vue"),
-  },
-  {
-    path: "/select",
-    name: "Select",
-    component: () =>
-      import(/* webpackChunkName: "select" */ "../view/selectday/index.vue"),
-  },
-  {
-    path: "/selectdetail",
-    name: "selectdetail",
-    component: () =>
-      import(/* webpackChunkName: "detail" */ "../view/selectday/detail.vue"),
-  },
-];
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      redirect: '/home'
+    },
+    {
+      path: '/home',
+      name: 'Home',
+      component: () => import('../view/Home.vue'),
+      meta: {
+        showTabBar: true
+      }
+    },
+    {
+      path: '/selected',
+      name: 'Selected',
+      component: () => import('../view/Selected.vue'),
+      meta: {
+        showTabBar: true
+      }
+    },
+    {
+      path: '/follow',
+      name: 'Follow',
+      component: () => import('../view/Follow.vue'),
+      meta: {
+        showTabBar: true
+      }
+    },
+    {
+      path: '/profile',
+      name: 'Profile',
+      component: () => import('../view/Profile.vue'),
+      meta: {
+        showTabBar: true
+      }
+    },
+    {
+      path: '/selectday',
+      name: 'SelectDay',
+      component: () => import('../view/selectday/index.vue')
+    },
+    {
+      path: '/detail',
+      name: 'Detail',
+      component: () => import('../view/selectday/detail.vue')
+    },
+    {
+      path: '/customer-service',
+      name: 'CustomerService',
+      component: () => import('../view/CustomerService.vue')
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: () => import('../view/Settings.vue')
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: () => import('../view/About.vue')
+    },
+    {
+      path: '/user-agreement',
+      name: 'UserAgreement',
+      component: () => import('../view/UserAgreement.vue')
+    },
+    {
+      path: '/privacy',
+      name: 'Privacy',
+      component: () => import('../view/Privacy.vue')
+    }
+  ],
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition;
     } else {
       return { top: 0 };
     }
-  },
-  routes,
+  }
+});
+
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+  // 确保页面滚动到顶部
+  window.scrollTo(0, 0);
+  next();
 });
 
 export default router;

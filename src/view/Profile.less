@@ -1,7 +1,57 @@
-.van-cell {
-  padding: 20px;
-  color: #596fc7;
-  --van-cell-icon-size: 28px;
-  --van-cell-font-size: 18px;
+// 覆盖 Vant 默认样式
+:root {
+  --van-grid-item-content-padding: 16px 8px;
+  --van-cell-group-inset-padding: 0;
+  --van-cell-group-inset-border-radius: 12px;
+  --van-cell-group-background-color: #ffffff;
+  --van-cell-group-title-padding: 16px 16px 8px;
+  --van-cell-vertical-padding: 12px;
+  --van-cell-horizontal-padding: 16px;
 }
 
+// 网格样式优化
+.van-grid-item {
+  &__content {
+    &::after {
+      border-width: 0;
+    }
+  }
+  
+  &__icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  
+  &__text {
+    color: #333;
+    font-size: 14px;
+  }
+}
+
+// 列表项样式优化
+.van-cell {
+  &__title {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  &__value {
+    color: #999;
+    font-size: 14px;
+  }
+}
+
+// 背景色设置
+body {
+  background-color: #f5f5f5;
+}
+
+// 导航栏样式
+.van-nav-bar {
+  background-color: transparent;
+  
+  &__title {
+    color: #333;
+    font-weight: bold;
+  }
+}
