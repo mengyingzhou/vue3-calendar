@@ -12,7 +12,7 @@
         <van-image
           width="80"
           height="80"
-          src="@/assets/images/avatar.svg"
+          src="src/assets/images/avatar.svg"
           class="app-logo"
         />
         <h2>玄叨叨</h2>

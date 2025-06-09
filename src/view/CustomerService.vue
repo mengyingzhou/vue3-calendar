@@ -34,7 +34,7 @@
         <div class="info-section">
           <div class="section-title">添加步骤</div>
           <div class="section-content">
-            <div>1. 复制微信号</div>
+            <div>1. 点击复制微信号</div>
             <div>2. 微信里面点击添加好友</div>
             <div>3. 粘贴微信号添加客服微信</div>
           </div>

@@ -47,3 +47,9 @@ npm run dev
 ```
 npm run build
 ```
+
+### 运行后台上传系统
+```
+npm run upload-server
+```
+TODO：需求去云平台开放3000的安全组

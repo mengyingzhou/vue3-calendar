@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // 检查登录状态
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const loginExpiry = localStorage.getItem('loginExpiry');
+            const currentTime = new Date().getTime();
+
+            // 如果未登录或登录已过期，跳转到登录页面
+            if (!isLoggedIn || !loginExpiry || currentTime > parseInt(loginExpiry)) {
+                // 清除过期的登录状态
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('loginExpiry');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 如果距离过期时间不足5分钟，则更新过期时间
+            const timeToExpiry = parseInt(loginExpiry) - currentTime;
+            if (timeToExpiry < 5 * 60 * 1000) { // 5分钟
+                const newExpiryTime = new Date().getTime() + (30 * 60 * 1000);
+                localStorage.setItem('loginExpiry', newExpiryTime.toString());
+            }
+        }
+
+        // 页面加载时检查登录状态
+        checkLoginStatus();
+
+        // 定期检查登录状态（每分钟）
+        setInterval(checkLoginStatus, 60000);
+    </script>
+    <style>
+        #save-indicator {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .main-title {
+            text-align: center;
+            font-size: 32px;
+            color: #333;
+            margin: 30px 0;
+        }
+        .block h2 {
+            font-size: 22px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .button-group button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+        }
+        .button-group button:hover {
+            background-color: #0056b3;
+        }
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+            z-index: 3;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #dc3545;
+            color: white;
+            font-size: 14px;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+    <h1 class="main-title">修改后台数据</h1>
+    
+    <div class="block block-1">
+        <div class="container">
+            <h2>小蚊子独家课程</h2>
+            <div class="components-container">
+                <!-- 组件将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="block block-2">
+        <div class="container">
+            <h2>热门文章推荐</h2>
+            <div class="components-container">
+                <!-- 组件将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="block block-3">
+        <div class="container">
+            <h2>好运物品推荐</h2>
+            <div class="components-container">
+                <!-- 组件将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 带图片的组件模板 -->
+    <template id="component-template-with-image">
+        <div class="component">
+            <div class="image-upload-container">
+                <input type="file" class="image-upload" accept="image/*" data-max-size="500">
+                <img src="images/placeholder.svg" alt="上传图片">
+                <button class="upload-btn">上传图片</button>
+                <div class="upload-progress"></div>
+            </div>
+            <div class="text" contenteditable="true"></div>
+            <div class="button-group">
+                <button class="show-link-btn">当前链接</button>
+                <button class="edit-link-btn">修改链接</button>
+            </div>
+            <div class="link-edit">
+                <input type="text" class="link-input" placeholder="输入链接地址">
+            </div>
+        </div>
+    </template>
+
+    <!-- 不带图片的组件模板 -->
+    <template id="component-template-no-image">
+        <div class="component">
+            <div class="text" contenteditable="true"></div>
+            <div class="button-group">
+                <button class="show-link-btn">当前链接</button>
+                <button class="edit-link-btn">修改链接</button>
+            </div>
+            <div class="link-edit">
+                <input type="text" class="link-input" placeholder="输入链接地址">
+            </div>
+        </div>
+    </template>
+
+    <style>
+        /* 保存提示框样式 */
+        #save-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 4px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 16px;
+        }
+    </style>
+
+    <script>
+        // 退出登录函数
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('loginExpiry');
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
