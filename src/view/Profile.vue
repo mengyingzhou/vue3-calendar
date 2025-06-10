@@ -58,47 +58,58 @@
       </van-grid>
     </van-cell-group>
 
-    <!-- 第一个图片列表区块 -->
-    <van-cell-group inset title="精选推荐" class="content-group">
-      <van-cell v-for="i in 3" :key="i" is-link>
+    <!-- 小蚊子独家课程 -->
+    <van-cell-group inset title="小蚊子独家课程" class="content-group">
+      <van-cell 
+        v-for="(item, index) in courseRecommendations" 
+        :key="index" 
+        is-link
+        @click="openLink(item.link)"
+      >
         <template #icon>
           <van-image
-            width="3rem"
+            width="5rem"
             height="3rem"
-            src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
-            class="cell-image"
+            :src="item.image"
+            class="cell-image rectangle-image"
           />
         </template>
         <template #title>
-          <span class="cell-title">精选内容 {{ i }}</span>
-        </template>
-        <template #label>
-          <span class="cell-desc">精选内容描述 {{ i }}</span>
+          <span class="cell-title">{{ item.text }}</span>
         </template>
       </van-cell>
     </van-cell-group>
 
-    <!-- 图标列表区块 -->
-    <van-cell-group inset title="快捷功能" class="content-group">
-      <van-cell v-for="(item, index) in icons" :key="index" :icon="item.icon" :title="item.title" is-link />
+    <!-- 热门文章推荐 -->
+    <van-cell-group inset title="热门文章推荐" class="content-group">
+      <van-cell 
+        v-for="(item, index) in articleRecommendations" 
+        :key="index" 
+        :title="item.text" 
+        is-link 
+        :title-class="'article-title'"
+        @click="openLink(item.link)"
+      />
     </van-cell-group>
 
-    <!-- 第二个图片列表区块 -->
-    <van-cell-group inset title="热门推荐" class="content-group">
-      <van-cell v-for="i in 3" :key="i" is-link>
+    <!-- 好运物品推荐 -->
+    <van-cell-group inset title="好运物品推荐" class="content-group">
+      <van-cell 
+        v-for="(item, index) in luckyItemRecommendations" 
+        :key="index" 
+        is-link
+        @click="openLink(item.link)"
+      >
         <template #icon>
           <van-image
-            width="3rem"
+            width="5rem"
             height="3rem"
-            src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
-            class="cell-image"
+            :src="item.image"
+            class="cell-image rectangle-image"
           />
         </template>
         <template #title>
-          <span class="cell-title">热门内容 {{ i }}</span>
-        </template>
-        <template #label>
-          <span class="cell-desc">热门内容描述 {{ i }}</span>
+          <span class="cell-title">{{ item.text }}</span>
         </template>
       </van-cell>
     </van-cell-group>
@@ -117,18 +128,72 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const isLoggedIn = ref(true); // 默认为已登录状态，实际应用中应从状态管理或本地存储获取
 const userId = ref("123456"); // 模拟用户ID，实际应用中应从API获取
 
-const icons = reactive([
-  { icon: 'star-o', title: '我的收藏' },
-  { icon: 'friends-o', title: '我的关注' },
-  { icon: 'clock-o', title: '浏览历史' }
-]);
+// 数据区块
+const articleRecommendations = ref([]);
+const courseRecommendations = ref([]);
+const luckyItemRecommendations = ref([]);
+
+// 根据区块索引和项目索引生成图片路径
+const getImagePath = (blockIndex: number, itemIndex: number) => {
+  return `/console/images/image${blockIndex}-${itemIndex + 1}.jpg`;
+};
+
+// 获取data.json中的数据
+const fetchData = async () => {
+  try {
+    const response = await fetch('/console/data.json');
+    const data = await response.json();
+    
+    // 获取热门文章推荐区块的数据
+    const articleBlock = data.blocks.find(block => block.title === "热门文章推荐");
+    if (articleBlock && articleBlock.components) {
+      articleRecommendations.value = articleBlock.components;
+    }
+    
+    // 获取小蚊子独家课程区块的数据
+    const courseBlock = data.blocks.find(block => block.title === "小蚊子独家课程");
+    if (courseBlock && courseBlock.components) {
+      // 为每个课程添加对应的图片路径（第1个区块）
+      courseRecommendations.value = courseBlock.components.map((item, index) => ({
+        ...item,
+        image: getImagePath(1, index) // 使用第1个区块的图片
+      }));
+    }
+    
+    // 获取好运物品推荐区块的数据
+    const luckyItemBlock = data.blocks.find(block => block.title === "好运物品推荐");
+    if (luckyItemBlock && luckyItemBlock.components) {
+      // 为每个好运物品添加对应的图片路径（第3个区块）
+      luckyItemRecommendations.value = luckyItemBlock.components.map((item, index) => ({
+        ...item,
+        image: getImagePath(3, index) // 使用第3个区块的图片
+      }));
+    }
+  } catch (error) {
+    console.error('获取数据失败:', error);
+  }
+};
+
+// 处理链接点击
+const openLink = (link) => {
+  if (link) {
+    window.open(link, '_blank');
+  } else {
+    console.log('链接不可用');
+  }
+};
+
+// 在组件挂载时获取数据
+onMounted(() => {
+  fetchData();
+});
 
 // 导航函数
 const goToCustomerService = () => {
@@ -195,13 +260,27 @@ const goToSettings = () => {
   overflow: hidden;
 
   .cell-image {
-    margin-right: 12px;
+    margin-right: 5px;
     border-radius: 6px;
   }
 
+  .rectangle-image {
+    :deep(.van-image__img) {
+      object-fit: contain;
+      background-color: #f5f5f5;
+    }
+  }
+
   .cell-title {
-    font-size: 16px;
+    font-size: 14px;
     color: #333;
+    max-width: 100%;
+    display: inline-block;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.4;
+    padding: 4px 0;
+    white-space: pre-line;
   }
 
   .cell-desc {
@@ -239,6 +318,10 @@ const goToSettings = () => {
     color: #333;
     font-weight: bold;
   }
+}
+
+:deep(.article-title) {
+  padding-left: 5px;
 }
 
 .footer {

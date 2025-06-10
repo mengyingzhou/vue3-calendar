@@ -5,16 +5,16 @@
       "title": "小蚊子独家课程",
       "components": [
         {
-          "text": "123",
-          "link": "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU2NDgwNzQ1OQ==&action=getalbum&album_id=3460503078598623237#wechat_redirect"
+          "text": "[小白必看] 说人话的八字课!",
+          "link": "https://app1bq5ywqm2502.h5.xiaoeknow.com/p/course/ecourse/course_2viplSZgoKwlA1BE3e9xoObLpXI"
         },
         {
-          "text": "123",
-          "link": "#"
+          "text": "[实战看盘] 现学现用的看盘课",
+          "link": ""
         },
         {
-          "text": "546456",
-          "link": "#"
+          "text": "[进阶必看] 超厉害的命理课",
+          "link": ""
         }
       ]
     },
@@ -22,28 +22,24 @@
       "title": "热门文章推荐",
       "components": [
         {
-          "text": "功能描述文本4",
-          "link": "#"
+          "text": "每月专属运势",
+          "link": "https://mp.weixin.qq.com/mp/homepage?__biz=MzU2NDgwNzQ1OQ==&hid=40&sn=59ef6c36fdca4533afeb1fe5eb2b9131"
         },
         {
-          "text": "llll2",
-          "link": "#"
+          "text": "五行性格系列",
+          "link": "https://mp.weixin.qq.com/mp/homepage?__biz=MzU2NDgwNzQ1OQ==&hid=25&sn=e93ee928fdca3a22c92a98a9c96fb200"
         },
         {
-          "text": "功能描述文本6",
-          "link": "#"
+          "text": "五行星座系列",
+          "link": "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU2NDgwNzQ1OQ==&action=getalbum&album_id=3976335524037345281#wechat_redirect"
         },
         {
-          "text": "功能描述文本7",
-          "link": "#"
+          "text": "六十日柱系列",
+          "link": "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU2NDgwNzQ1OQ==&action=getalbum&album_id=3460503078598623237#wechat_redirect"
         },
         {
-          "text": "功能描述文本8",
-          "link": "#"
-        },
-        {
-          "text": "功能描述文本9",
-          "link": "#"
+          "text": "十神进阶系列",
+          "link": "https://mp.weixin.qq.com/mp/homepage?__biz=MzU2NDgwNzQ1OQ==&hid=27&sn=f4c967afcd77675f7bbe64f2e5c1cc8d"
         }
       ]
     },
@@ -51,16 +47,12 @@
       "title": "好运物品推荐",
       "components": [
         {
-          "text": "功能描述文本10",
-          "link": "#"
+          "text": "好运手串来袭                            利桃花、平安、财运",
+          "link": ""
         },
         {
-          "text": "功能描述文本11",
-          "link": "#"
-        },
-        {
-          "text": "功能描述文本12",
-          "link": "#"
+          "text": "满满能量手机贴                      利财运、学业等~",
+          "link": "#小程序://快团团/W9nLQx3vxHDVrZc"
         }
       ]
     }
