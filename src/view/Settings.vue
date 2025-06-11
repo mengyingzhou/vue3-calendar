@@ -7,38 +7,21 @@
       @click-left="onClickLeft"
     />
     
-    <div class="content">
-      <!-- 账号设置 -->
-      <van-cell-group inset class="setting-group">
-        <van-cell title="账号设置" is-link />
-      </van-cell-group>
-      
+    <div class="content">      
       <!-- 关于和协议 -->
       <van-cell-group inset class="setting-group">
         <van-cell title="关于我们" is-link @click="goToAbout" />
         <van-cell title="用户协议" is-link @click="goToUserAgreement" />
         <van-cell title="隐私权益" is-link @click="goToPrivacy" />
       </van-cell-group>
-      
-      <!-- 退出登录 -->
-      <van-cell-group inset class="setting-group" v-if="isLoggedIn">
-        <van-cell 
-          title="退出登录" 
-          class="logout-cell"
-          @click="showLogoutConfirm"
-        />
-      </van-cell-group>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { Dialog, Toast } from 'vant';
 
 const router = useRouter();
-const isLoggedIn = ref(true);
 
 const onClickLeft = () => {
   router.back();
@@ -56,24 +39,6 @@ const goToPrivacy = () => {
   router.push('/privacy');
 };
 
-const showLogoutConfirm = () => {
-  Dialog.confirm({
-    title: '退出登录',
-    message: '确定要退出登录吗？',
-    showCancelButton: true,
-  }).then(() => {
-    logout();
-  }).catch(() => {
-    // 取消操作
-  });
-};
-
-const logout = () => {
-  // 实际退出登录的逻辑
-  isLoggedIn.value = false;
-  Toast('已退出登录');
-  router.push('/home');
-};
 </script>
 
 <style lang="less" scoped>
@@ -90,15 +55,6 @@ const logout = () => {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
-  
-  .logout-cell {
-    color: #ee0a24;
-    text-align: center;
-    
-    :deep(.van-cell__title) {
-      text-align: center;
-    }
-  }
 }
 
 :deep(.van-nav-bar) {

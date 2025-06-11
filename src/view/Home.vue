@@ -178,13 +178,13 @@
         </div>
       </div>
     </div> -->
-      <footer style="text-align: center; padding: 20px 0;">
+    
+    <!-- 备案信息 -->
+    <footer class="footer">
       <a 
         href="https://beian.miit.gov.cn/" 
         target="_blank"
-        style="color: #666; text-decoration: none; font-size: 14px;"
-        onmouseover="this.style.color='#333'"
-        onmouseout="this.style.color='#666'"
+        class="beian-link"
       >
         黔ICP备2025044569号-2
       </a>

@@ -7,17 +7,21 @@
     <div class="user-info-wrapper">
       <van-cell center :border="false" class="user-info">
         <template #icon>
-          <van-image
-            round
-            width="4rem"
-            height="4rem"
-            src="@/assets/images/avatar.svg"
-            class="avatar"
-          />
+          <div class="clickable-area" @click="handleUserInfoClick">
+            <van-image
+              round
+              width="4rem"
+              height="4rem"
+              src="src/assets/images/avatar.svg"
+              class="avatar"
+            />
+          </div>
         </template>
         <template #title>
-          <div class="user-name">未登录</div>
-          <div v-if="isLoggedIn" class="user-id">ID: {{ userId }}</div>
+          <div class="clickable-area" @click="handleUserInfoClick">
+            <div class="user-name">{{ username }}</div>
+            <div v-if="isLoggedIn" class="user-id">邮箱: {{ userId }}</div>
+          </div>
         </template>
         <template #right-icon>
           <div class="action-icons">
@@ -130,10 +134,12 @@
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { AuthService } from "../utils/auth";
 
 const router = useRouter();
-const isLoggedIn = ref(true); // 默认为已登录状态，实际应用中应从状态管理或本地存储获取
-const userId = ref("123456"); // 模拟用户ID，实际应用中应从API获取
+const isLoggedIn = ref(false);
+const userId = ref("");
+const username = ref("未登录");
 
 // 数据区块
 const articleRecommendations = ref([]);
@@ -190,9 +196,41 @@ const openLink = (link) => {
   }
 };
 
-// 在组件挂载时获取数据
+// 处理用户信息区块点击
+const handleUserInfoClick = () => {
+  if (isLoggedIn.value) {
+    // 已登录，跳转到账户设置页面
+    router.push('/accountsetting');
+  } else {
+    // 未登录，跳转到登录页面
+    router.push('/login');
+  }
+};
+
+// 在组件挂载时获取数据和用户信息
 onMounted(() => {
   fetchData();
+  
+  // 检查用户登录状态
+  isLoggedIn.value = AuthService.isAuthenticated();
+  
+  // 如果已登录，获取最新的用户信息
+  if (isLoggedIn.value) {
+    AuthService.getCurrentUser().then(user => {
+      if (user) {
+        username.value = user.username || '用户';
+        userId.value = user.email || '';
+      }
+    }).catch(error => {
+      console.error('获取用户信息失败:', error);
+      // 如果获取失败，尝试使用本地存储的信息
+      const storedUser = AuthService.getStoredUser();
+      if (storedUser) {
+        username.value = storedUser.username || '用户';
+        userId.value = storedUser.email || '';
+      }
+    });
+  }
 });
 
 // 导航函数
@@ -234,9 +272,22 @@ const goToSettings = () => {
   }
 
   .user-id {
-    font-size: 14px;
+    font-size: 12px;
     color: #999;
     margin-top: 4px;
+  }
+  
+  .clickable-area {
+    cursor: pointer;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+    
+    &:active {
+      opacity: 0.6;
+    }
   }
 
   .action-icons {

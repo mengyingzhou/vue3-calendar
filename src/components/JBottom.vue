@@ -6,11 +6,33 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, toRefs} from "vue";
+import { reactive, toRefs, onMounted, watch } from "vue";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const state = reactive({
-    active:0
+    active: Number(localStorage.getItem('tabbarActive')) || 0
 });
+
+// 监听路由变化
+watch(() => route.path, (newPath) => {
+    if (newPath === '/profile') {
+        state.active = 1;
+        localStorage.setItem('tabbarActive', '1');
+    } else if (newPath === '/') {
+        state.active = 0;
+        localStorage.setItem('tabbarActive', '0');
+    }
+});
+
+// 组件挂载时初始化
+onMounted(() => {
+    if (route.path === '/profile') {
+        state.active = 1;
+        localStorage.setItem('tabbarActive', '1');
+    }
+});
+
 const { active } = toRefs(state);
 </script>
 
@@ -21,5 +43,6 @@ const { active } = toRefs(state);
     display: flex;
     justify-content: flex-end;
     width: 100%;
+    max-width:380px;
 }
 </style>
