@@ -20,7 +20,7 @@
         <template #title>
           <div class="clickable-area" @click="handleUserInfoClick">
             <div class="user-name">{{ username }}</div>
-            <div v-if="isLoggedIn" class="user-id">邮箱: {{ userId }}</div>
+            <div v-if="isLoggedIn" class="user-id">手机号: {{ userId }}</div>
           </div>
         </template>
         <template #right-icon>
@@ -219,7 +219,7 @@ onMounted(() => {
     AuthService.getCurrentUser().then(user => {
       if (user) {
         username.value = user.username || '用户';
-        userId.value = user.email || '';
+        userId.value = user.phone || '';
       }
     }).catch(error => {
       console.error('获取用户信息失败:', error);

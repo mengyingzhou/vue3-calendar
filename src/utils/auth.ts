@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'http://wentaonism.com:3001/api';
 
 // 创建axios实例
 const apiClient = axios.create({
@@ -43,6 +43,7 @@ apiClient.interceptors.response.use(
 // 用户接口
 interface User {
   id: string;
+  phone: string;
   email: string;
   username: string;
   birthdate?: string;
@@ -51,6 +52,7 @@ interface User {
 
 // 注册请求接口
 interface RegisterRequest {
+  phone: string;
   email: string;
   username: string;
   password: string;
@@ -60,7 +62,8 @@ interface RegisterRequest {
 
 // 登录请求接口
 interface LoginRequest {
-  email: string;
+  email?: string;
+  phone?: string;
   password: string;
 }
 
@@ -75,14 +78,32 @@ interface AuthResponse {
 export const AuthService = {
   // 注册新用户
   async register(userData: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/register', userData);
-    return response.data;
+    try {
+      const response = await apiClient.post<AuthResponse>('/register', userData);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      return response.data;
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   // 用户登录
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/login', credentials);
-    return response.data;
+    try {
+      const response = await apiClient.post<AuthResponse>('/login', credentials);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      return response.data;
+    } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   // 获取当前用户信息
@@ -94,23 +115,27 @@ export const AuthService = {
         return null;
       }
 
-      // 如果有token，尝试从服务器获取最新信息
-      const token = localStorage.getItem('token');
-      if (token) {
-        const response = await apiClient.get('/user');
-        // 更新本地存储的用户信息
-        const updatedUser = {
-          ...storedUser,
-          ...response.data
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return updatedUser;
-      }
-      
-      return storedUser;
-    } catch (error) {
+      const response = await apiClient.get('/user', {
+        params: {
+          storedUser: storedUser  // 可选参数
+        },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      // 确保从响应中正确提取用户数据
+      const userData = response.data.user || response.data;
+      // 更新本地存储的用户信息
+      const updatedUser = {
+        ...storedUser,
+        ...userData
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (error: any) {
+      console.error('Get user error:', error.response?.data || error.message);
       // 如果服务器请求失败，返回本地存储的用户信息
-      return this.getStoredUser();
+      return null;
     }
   },
 
@@ -200,6 +225,51 @@ export const AuthService = {
       return JSON.parse(userStr);
     } catch {
       return null;
+    }
+  },
+
+  // 更新用户信息
+  async updateUserInfo(userData: {
+    username: string;
+    phone: string;
+    email: string;
+    birthdate: string;
+    gender: string;
+  }): Promise<{ message: string }> {
+    try {
+      const response = await apiClient.put('/user/update', userData);
+      
+      // 更新本地存储的用户信息
+      const storedUser = this.getStoredUser();
+      if (storedUser) {
+        const updatedUser = {
+          ...storedUser,
+          ...userData
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('Update user info error:', error.response?.data || error.message);
+      // 将服务器返回的错误消息传递给调用者
+      throw {
+        message: error.response?.data?.message || '更新用户信息失败',
+        ...error
+      };
+    }
+  },
+
+  // 修改密码
+  async changePassword(passwordData: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<void> {
+    try {
+      await apiClient.put('/user/change-password', passwordData);
+    } catch (error: any) {
+      console.error('Change password error:', error.response?.data || error.message);
+      throw error;
     }
   }
 };

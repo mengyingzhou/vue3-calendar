@@ -11,6 +11,17 @@
       <van-form @submit="register">
         <van-cell-group inset>
           <van-field
+            v-model="form.phone"
+            name="phone"
+            label="手机号(登录账号)"
+            placeholder="请输入手机号"
+            :rules="[
+              { required: true, message: '请输入手机号' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号' }
+            ]"
+            :error-message="errors.phone"
+          />
+          <van-field
             v-model="form.email"
             name="email"
             label="邮箱"
@@ -40,7 +51,8 @@
             placeholder="请输入密码"
             :rules="[
               { required: true, message: '请输入密码' },
-              { min: 6, message: '密码至少6个字符' }
+              { validator: (val) => /^(?=.*[A-Za-z])(?=.*\d).{6,32}$/.test(val),
+                message: '需6-32位且包含字母和数字' }
             ]"
             :error-message="errors.password"
           />
@@ -126,10 +138,20 @@ import { AuthService } from '../utils/auth';
 import { Notify } from 'vant';
 import dayjs from 'dayjs';
 
+interface RegisterRequest {
+  phone: string;
+  email: string;
+  username: string;
+  password: string;
+  birthdate: string;
+  gender: string;
+}
+
 const router = useRouter();
 const isSubmitting = ref(false);
 
 const form = reactive({
+  phone: '',
   email: '',
   username: '',
   password: '',
@@ -139,6 +161,7 @@ const form = reactive({
 });
 
 const errors = reactive({
+  phone: '',
   email: '',
   username: '',
   password: '',
@@ -166,12 +189,35 @@ const register = async () => {
   isSubmitting.value = true;
 
   try {
+    // 表单验证
     if (!form.birthdate) {
       errors.birthdate = '请选择生日';
+      isSubmitting.value = false;
       return;
     }
 
-    await AuthService.register({
+    if (!form.gender) {
+      errors.gender = '请选择性别';
+      isSubmitting.value = false;
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = '两次输入的密码不一致';
+      isSubmitting.value = false;
+      return;
+    }
+
+    if (!form.phone) {
+      errors.phone = '请输入手机号';
+      isSubmitting.value = false;
+      return;
+    }
+
+    console.log(form);
+    // 发送注册请求
+    const response = await AuthService.register({
+      phone: form.phone,
       email: form.email,
       username: form.username,
       password: form.password,
@@ -180,22 +226,33 @@ const register = async () => {
     });
 
     Notify({ type: 'success', message: '注册成功' });
-    router.push('/login');
+    
+    // 延迟跳转，让用户看到成功提示
+    setTimeout(() => {
+      router.push('/login');
+    }, 1500);
   } catch (error: any) {
+    console.error('Registration error:', error);
     if (error.response && error.response.data) {
       const { message } = error.response.data;
-      if (message.includes('邮箱')) {
-        errors.email = message;
-      } else if (message.includes('用户名')) {
-        errors.username = message;
-      } else if (message.includes('密码')) {
-        errors.password = message;
-      } else if (message.includes('生日')) {
-        errors.birthdate = message;
-      } else if (message.includes('性别')) {
-        errors.gender = message;
+      if (message && typeof message === 'string') {
+        if (message.includes('邮箱')) {
+          errors.email = message;
+        } else if (message.includes('手机号')) {
+          errors.phone = message;
+        } else if (message.includes('用户名')) {
+          errors.username = message;
+        } else if (message.includes('密码')) {
+          errors.password = message;
+        } else if (message.includes('生日')) {
+          errors.birthdate = message;
+        } else if (message.includes('性别')) {
+          errors.gender = message;
+        } else {
+          errors.general = message || '注册失败，请稍后再试';
+        }
       } else {
-        errors.general = message || '注册失败，请稍后再试';
+        errors.general = '注册失败，请稍后再试';
       }
     } else {
       errors.general = '网络错误，请检查您的连接';

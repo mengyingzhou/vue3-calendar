@@ -30,6 +30,9 @@ onMounted(() => {
     if (route.path === '/profile') {
         state.active = 1;
         localStorage.setItem('tabbarActive', '1');
+    } else if (route.path === '/') {
+        state.active = 0;
+        localStorage.setItem('tabbarActive', '0');
     }
 });
 

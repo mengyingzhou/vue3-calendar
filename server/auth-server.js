@@ -1,5 +1,5 @@
 import express from 'express';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
@@ -35,23 +35,39 @@ async function connectToMongo() {
 // 用户注册
 app.post('/api/register', async (req, res) => {
   try {
-    const { email, username, password, birthdate, gender } = req.body;
+    const { phone, email, username, password, birthdate, gender } = req.body;
 
     // 验证必填字段
-    if (!email || !username || !password || !birthdate || !gender) {
-      return res.status(400).json({ message: '所有字段都是必填的' });
+    if ((!email && !phone) || !username || !password || !birthdate || !gender) {
+      return res.status(400).json({ message: '用户名、密码、出生日期和性别都是必填的，邮箱和手机号至少需要提供一个' });
     }
 
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: '邮箱格式不正确' });
+    // 如果提供了邮箱，验证邮箱格式
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: '邮箱格式不正确' });
+      }
+
+      // 检查邮箱是否已存在
+      const existingUserByEmail = await db.collection('user_profile').findOne({ email });
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: '该邮箱已被注册' });
+      }
     }
 
-    // 检查邮箱是否已存在
-    const existingUser = await db.collection('user_profile').findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: '该邮箱已被注册' });
+    // 如果提供了手机号，验证手机号格式（中国大陆手机号）
+    if (phone) {
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ message: '手机号格式不正确' });
+      }
+
+      // 检查手机号是否已存在
+      const existingUserByPhone = await db.collection('user_profile').findOne({ phone });
+      if (existingUserByPhone) {
+        return res.status(400).json({ message: '该手机号已被注册' });
+      }
     }
 
     // 检查用户名是否已存在
@@ -67,6 +83,7 @@ app.post('/api/register', async (req, res) => {
     // 创建用户
     const newUser = {
       email,
+      phone,
       username,
       password: hashedPassword,
       birthdate,
@@ -80,7 +97,12 @@ app.post('/api/register', async (req, res) => {
 
     // 生成JWT令牌
     const token = jwt.sign(
-      { userId: result.insertedId, email, username },
+      { 
+        userId: result.insertedId, 
+        username,
+        ...(email && { email }),
+        ...(phone && { phone })
+      },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -90,12 +112,12 @@ app.post('/api/register', async (req, res) => {
       token,
       user: {
         id: result.insertedId,
-        email,
-        username
+        username,
+        ...(email && { email }),
+        ...(phone && { phone })
       }
     });
   } catch (error) {
-    console.error('注册错误:', error);
     res.status(500).json({ message: '服务器错误，请稍后再试' });
   }
 });
@@ -103,28 +125,41 @@ app.post('/api/register', async (req, res) => {
 // 用户登录
 app.post('/api/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
 
     // 验证必填字段
-    if (!email || !password) {
-      return res.status(400).json({ message: '邮箱和密码都是必填的' });
+    if ((!email && !phone) || !password) {
+      return res.status(400).json({ message: '账号和密码都是必填的' });
+    }
+
+    // 构建查询条件（邮箱或手机号）
+    const query = {};
+    if (email) {
+      query.email = email;
+    } else if (phone) {
+      query.phone = phone;
     }
 
     // 查找用户
-    const user = await db.collection('user_profile').findOne({ email });
+    const user = await db.collection('user_profile').findOne(query);
     if (!user) {
-      return res.status(401).json({ message: '邮箱或密码不正确' });
+      return res.status(401).json({ message: '账号或密码不正确' });
     }
 
     // 验证密码
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: '邮箱或密码不正确' });
+      return res.status(401).json({ message: '账号或密码不正确' });
     }
 
     // 生成JWT令牌
     const token = jwt.sign(
-      { userId: user._id, email: user.email, username: user.username },
+      { 
+        userId: user._id, 
+        username: user.username,
+        ...(user.email && { email: user.email }),
+        ...(user.phone && { phone: user.phone })
+      },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -134,12 +169,12 @@ app.post('/api/login', async (req, res) => {
       token,
       user: {
         id: user._id,
-        email: user.email,
-        username: user.username
+        username: user.username,
+        ...(user.email && { email: user.email }),
+        ...(user.phone && { phone: user.phone })
       }
     });
   } catch (error) {
-    console.error('登录错误:', error);
     res.status(500).json({ message: '服务器错误，请稍后再试' });
   }
 });
@@ -162,12 +197,162 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// 获取用户信息（需要认证）
+// 更新用户信息
+app.put('/api/user/update', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { username, email, phone, birthdate, gender } = req.body;
+
+    // 验证必填字段
+    if (!username || !email || !phone || !birthdate || !gender) {
+      return res.status(400).json({ message: '所有字段都是必填的' });
+    }
+
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: '邮箱格式不正确' });
+    }
+
+    // 如果提供了手机号，验证手机号格式（中国大陆手机号）
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ message: '手机号格式不正确' });
+    }
+
+    // 检查邮箱是否已被其他用户使用
+    const existingUserByEmail = await db.collection('user_profile').findOne({
+      email,
+      _id: { $ne: new ObjectId(userId) }
+    });
+    if (existingUserByEmail) {
+      return res.status(400).json({ message: '该邮箱已被其他用户使用' });
+    }
+
+    // 检查手机号是否已被其他用户使用
+    const existingUserByPhone = await db.collection('user_profile').findOne({
+      phone,
+      _id: { $ne: new ObjectId(userId) }
+    });
+    if (existingUserByPhone) {
+      return res.status(400).json({ message: '该手机号已被其他用户使用' });
+    }
+
+    // 检查用户名是否已被其他用户使用
+    const existingUsername = await db.collection('user_profile').findOne({
+      username,
+      _id: { $ne: new ObjectId(userId) }
+    });
+    if (existingUsername) {
+      return res.status(400).json({ message: '该用户名已被其他用户使用' });
+    }
+
+    // 更新用户信息
+    const result = await db.collection('user_profile').updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          username,
+          email,
+          phone,
+          birthdate,
+          gender,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+
+    res.status(200).json({ message: '用户信息更新成功' });
+  } catch (error) {    
+    // 提供更详细的错误信息
+    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+      // MongoDB 错误
+      if (error.code === 11000) {
+        // 唯一索引冲突
+        const field = Object.keys(error.keyPattern)[0];
+        let message = '该信息已被使用';
+        if (field === 'email') message = '该邮箱已被使用';
+        if (field === 'phone') message = '该手机号已被使用';
+        return res.status(400).json({ message });
+      }
+    }
+    
+    // 如果有具体的错误消息，则返回它
+    const errorMessage = error.message || '服务器错误，请稍后再试';
+    res.status(500).json({ message: errorMessage });
+  }
+});
+
+// 修改密码
+app.put('/api/user/change-password', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    // 检查请求体是否为空或不是对象
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({ message: '无效的请求数据' });
+    }
+    
+    const { oldPassword, newPassword } = req.body;
+    
+    // 验证必填字段
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: '当前密码和新密码都是必填的' });
+    }
+    
+    // 确保密码是字符串类型
+    if (typeof oldPassword !== 'string' || typeof newPassword !== 'string') {
+      return res.status(400).json({ message: '密码必须是字符串类型' });
+    }
+
+    // 获取用户信息
+    const user = await db.collection('user_profile').findOne({ _id: new ObjectId(userId) });
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+
+    // 验证当前密码
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: '当前密码不正确' });
+    }
+
+    // 加密新密码
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // 更新密码
+    await db.collection('user_profile').updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          password: hashedPassword,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    res.status(200).json({ message: '密码修改成功' });
+  } catch (error) {
+    // 提供更详细的错误信息
+    if (error instanceof SyntaxError) {
+      return res.status(400).json({ message: '请求数据格式错误: ' + error.message });
+    }
+    res.status(500).json({ message: '服务器错误，请稍后再试' });
+  }
+});
+
+// 获取用户信息
 app.get('/api/user', authenticateToken, async (req, res) => {
   try {
+    const userId = req.user.userId;  // 优先使用查询参数
     const user = await db.collection('user_profile').findOne(
-      { _id: req.user.userId },
-      { projection: { password: 0 } } // 排除密码字段
+      { _id: new ObjectId(userId) },
+      { projection: { password: 0 } }
     );
 
     if (!user) {
@@ -176,7 +361,6 @@ app.get('/api/user', authenticateToken, async (req, res) => {
 
     res.status(200).json({ user });
   } catch (error) {
-    console.error('获取用户信息错误:', error);
     res.status(500).json({ message: '服务器错误，请稍后再试' });
   }
 });
@@ -184,7 +368,7 @@ app.get('/api/user', authenticateToken, async (req, res) => {
 // 启动服务器
 async function startServer() {
   await connectToMongo();
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`认证服务器运行在 http://localhost:${PORT}`);
   });
 }

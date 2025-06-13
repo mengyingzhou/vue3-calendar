@@ -11,15 +11,23 @@
       <van-form @submit="login">
         <van-cell-group inset>
           <van-field
-            v-model="form.email"
-            name="email"
-            label="邮箱"
-            placeholder="请输入邮箱地址"
+            v-model="form.phone"
+            name="phone"
+            label="账号"
+            placeholder="请输入手机号或邮箱地址"
             :rules="[
-              { required: true, message: '请输入邮箱地址' },
-              { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '请输入有效的邮箱地址' }
+              { required: true, message: '请输入手机号或邮箱地址' },
+              { 
+                validator: (val) => {
+                  // 验证是否为有效的邮箱或手机号
+                  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  const phonePattern = /^1[3-9]\d{9}$/;
+                  return emailPattern.test(val) || phonePattern.test(val);
+                }, 
+                message: '请输入有效的手机号或邮箱地址' 
+              }
             ]"
-            :error-message="errors.email"
+            :error-message="errors.phone"
           />
           <van-field
             v-model="form.password"
@@ -71,12 +79,12 @@ const router = useRouter();
 const isSubmitting = ref(false);
 
 const form = reactive({
-  email: '',
+  phone: '',
   password: ''
 });
 
 const errors = reactive({
-  email: '',
+  phone: '',
   password: '',
   general: ''
 });
@@ -90,31 +98,50 @@ const login = async (values: any) => {
   isSubmitting.value = true;
 
   try {
-    const response = await AuthService.login({
-      email: form.email,
-      password: form.password
-    });
+    // 判断输入的是邮箱还是手机号
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.phone);
+    const isPhone = /^1[3-9]\d{9}$/.test(form.phone);
+    
+    let loginParams;
+    if (isEmail) {
+      loginParams = {
+        email: form.phone,
+        password: form.password
+      };
+    } else if (isPhone) {
+      loginParams = {
+        phone: form.phone,
+        password: form.password
+      };
+    } else {
+      throw new Error('请输入有效的手机号或邮箱地址');
+    }
+    
+    const response = await AuthService.login(loginParams);
 
-    // 保存令牌到本地存储
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    // AuthService.login 已经保存了令牌到本地存储，这里不需要重复
     // 设置底部导航栏选中"我的"选项
     localStorage.setItem('tabbarActive', '1');
 
     Notify({ type: 'success', message: '登录成功' });
     router.push('/profile');
   } catch (error: any) {
+    console.error('Login error:', error);
     if (error.response && error.response.data) {
       const { message } = error.response.data;
-      if (message.includes('邮箱')) {
-        errors.email = message;
-      } else if (message.includes('密码')) {
-        errors.password = message;
+      if (message && typeof message === 'string') {
+        if (message.includes('邮箱') || message.includes('手机号')) {
+          errors.phone = message;
+        } else if (message.includes('密码')) {
+          errors.password = message;
+        } else {
+          errors.general = message || '登录失败，请检查您的账号和密码';
+        }
       } else {
-        errors.general = message || '登录失败，请检查您的邮箱和密码';
+        errors.general = '登录失败，请检查您的账号和密码';
       }
     } else {
-      errors.general = '网络错误，请检查您的连接';
+      errors.general = error.message || '网络错误，请检查您的连接';
     }
   } finally {
     isSubmitting.value = false;
