@@ -35,7 +35,7 @@
     <!-- 统计网格 -->
     <van-cell-group inset class="stats-grid">
       <van-grid :border="false" :column-num="3">
-        <van-grid-item>
+        <van-grid-item @click="goToStarDays">
           <template #icon>
             <van-icon name="star" color="#ff9900" size="28" />
           </template>
@@ -240,6 +240,10 @@ const goToCustomerService = () => {
 
 const goToSettings = () => {
   router.push('/settings');
+};
+
+const goToStarDays = () => {
+  router.push('/star-days');
 };
 </script>
 

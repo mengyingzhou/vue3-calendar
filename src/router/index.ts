@@ -100,6 +100,11 @@ const router = createRouter({
       path: '/privacy',
       name: 'Privacy',
       component: () => import('../view/Privacy.vue')
+    },
+    {
+      path: '/star-days',
+      name: 'StarDays',
+      component: () => import('../view/StarDays.vue')
     }
   ],
   scrollBehavior(to, from, savedPosition) {
