@@ -91,6 +91,79 @@
         <Icon class="showinfo_yili_icon" @click="nextDay(1)" name="arrow" />
       </div>
     </div>
+
+    <div class="card_wrap">
+      <!-- 第一张卡 -->
+      <section class="card card-1">
+        <div class="small-title">本日的五行日主是：</div>
+        <img :src="wuxingFirstCharMap[dateinfo.tiangan]?.imageUrl" alt="五行图标" />
+        <h3 class="elem-name" :style="{ color: wuxingFirstCharMap[dateinfo.tiangan]?.color }">{{ wuxingFirstCharMap[dateinfo.tiangan]?.name }}</h3>
+        <p class="elem-desc" :style="{ color: wuxingFirstCharMap[dateinfo.tiangan]?.color }">{{ wuxingFirstCharMap[dateinfo.tiangan]?.description }}</p>
+      </section>
+
+      <!-- 第二张卡 -->
+      <section class="card card-2">
+        <div class="line">{{ dateinfo.ganzhiyear.substring(0, 2) }}年 {{ dateinfo.ganzhimonth }}月 {{ dateinfo.ganzhiday }}日 【{{ dateinfo.ganzhiyear.charAt(1) }}{{ dateinfo.ganzhiyear.charAt(dateinfo.ganzhiyear.length - 2) }}】 {{ dateinfo.yinli }}</div>
+
+        <div class="two-col">
+          <!-- 左组件：四个并排的子组件（每个：上灰字/下彩字） -->
+          <div class="left-four">
+            <div>
+              <div class="meta">年</div>
+              <div class="value">
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhiyear.charAt(0)]?.color }">{{ dateinfo.ganzhiyear.charAt(0) }}</span>
+                <br><br>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhiyear.charAt(1)]?.color }">{{ dateinfo.ganzhiyear.charAt(1) }}</span>
+              </div>
+            </div>
+            <div>
+              <div class="meta">月</div>
+              <div class="value">
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhimonth.charAt(0)]?.color }">{{ dateinfo.ganzhimonth.charAt(0) }}</span>
+                <br><br>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhimonth.charAt(1)]?.color }">{{ dateinfo.ganzhimonth.charAt(1) }}</span>
+              </div>
+            </div>
+            <div>
+              <div class="meta">日</div>
+              <div class="value">
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhiday.charAt(0)]?.color }">{{ dateinfo.ganzhiday.charAt(0) }}</span>
+                <br><br>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhiday.charAt(1)]?.color }">{{ dateinfo.ganzhiday.charAt(1) }}</span>
+              </div>
+            </div>
+            <div>
+              <div class="meta">时</div>
+              <div class="value">
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.wuxing.charAt(0)]?.color }">{{ dateinfo.wuxing.charAt(0) }}</span>
+                <br><br>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.wuxing.charAt(1)]?.color }">{{ dateinfo.wuxing.charAt(1) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右组件：竖向四行；每行左右并排，左橘底，右黑字 -->
+          <div class="right-list">
+            <div class="right-item">
+              <span class="badge">日柱</span>
+              <span class="item-text">{{ dateinfo.ganzhiday }}</span>
+            </div>
+            <div class="right-item">
+              <span class="badge">月份</span>
+              <span class="item-text">{{ dateinfo.ganzhimonth }}</span>
+            </div>
+            <div class="right-item">
+              <span class="badge">星座</span>
+              <span class="item-text">{{ getConstellationByDate(selectDate.getMonth() + 1, selectDate.getDay())?.name }}</span>
+            </div>
+            <div class="right-item">
+              <span class="badge">调候<br>建议</span>
+              <span class="item-text">{{ tiaohouMap[dateinfo.ganzhiday.charAt(0) + dateinfo.ganzhimonth.charAt(1)]?.value }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
     <!-- <div class="showinfo">
       <div class="showinfo_yiji">
         <div class="showinfo_yiji_cont">
@@ -200,6 +273,8 @@ import datePicker from "@/components/datepicker.vue";
 import { reactive, ref } from "vue";
 import { getYearWeek } from "../utils/getweeks";
 import { useRouter } from "vue-router";
+import { wuxingFirstCharMap, tiaohouMap } from "../config/wuxing";
+import { getConstellationByDate } from "../config/constellation";
 
 const showpicker = ref(false);
 //固定年月,用于判断当前时间
@@ -277,6 +352,7 @@ const dateinfo = reactive<any>({
   dayyi: [],
   dayji: [],
   wuxing: "",
+  tiangan: "", // 新增属性，存储五行的最后一个字
   chongsha: "",
   zhishen: "",
   xishenpos: "",
@@ -302,6 +378,8 @@ const getDateInfo = (item: any) => {
   dateinfo.dayyi = item.getLunar().getDayYi();
   dateinfo.dayji = item.getLunar().getDayJi();
   dateinfo.wuxing = item.getLunar().getDayNaYin();
+  // 设置tiangan为ganzhiday的第一个字
+  dateinfo.tiangan = dateinfo.ganzhiday.charAt(0);
   dateinfo.xingqi = item.getWeekInChinese();
   dateinfo.pzbj =
     item.getLunar().getPengZuGan() + " " + item.getLunar().getPengZuZhi();
@@ -319,7 +397,7 @@ const getDateInfo = (item: any) => {
   dateinfo.times.pop();
 };
 getDateInfo(todayins);
-
+(window as any).dateinfo = dateinfo
 /**
  * @description: 正数为下一天,负数为上一天
  * @param {number} val

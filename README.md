@@ -1,13 +1,20 @@
-<!--
- * @Description:
- * @Date: 2023-05-18 15:16:10
- * @Author: didi
- * @LastEditTime: 2023-05-19 18:10:28
--->
-
 # vue3-calendar
 
-万年历,老黄历.日历
+小程序的需求文档，汇总信息：
+
+1.需求文档：
+https://shimo.im/file-invite/7aMxCjeUF86QUmwSnpoWrAAGVZwv6/ Mia 邀请您协作《小程序需求文档》，点击链接开始编辑
+
+2.界面原型图：
+https://js.design/f/CpAtIS?p=_8GZgks6Vp&mode=design 邀请您查看「五行小程序」，点击链接开启协作
+
+3.界面涉及的icon在上面的文件夹里
+
+4.调候用神算法：
+https://shimo.im/file-invite/GYN2uUvvmG9s69XATcAKz7210Wox6/ 未知作者 邀请您协作《调候用神算法》，点击链接开始编辑
+
+
+
 
 ### 体验地址
 

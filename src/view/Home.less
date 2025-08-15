@@ -358,3 +358,118 @@
     color: #333;
   }
 }
+
+/* 页面容器（与截图一致的宽度与留白） */
+.card_wrap{
+  width: 320px;               /* 关键宽度，保证一比一布局 */
+  margin: 20px auto;
+}
+
+/* 通用卡片 */
+.card{
+  background:#ffffff;                   /* var(--card) */
+  border:1px solid #eceff4;             /* var(--border) */
+  border-radius:16px;                   /* var(--r) */
+  box-shadow:0 4px 12px rgba(0,0,0,.06);/* var(--shadow) */
+  padding: 14px 14px 16px;
+}
+
+/* 小标题（黑色、居中、小号） */
+.small-title{
+  margin: 2px 0 10px;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: .2px;
+}
+
+/* ===== 第一张卡 ===== */
+.card-1{
+  margin-bottom: 14px;
+  text-align:center;
+}
+
+/* 元素名（居中） */
+.elem-name{
+  margin: 0;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* 描述（居中） */
+.elem-desc{
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #ffb27a;      /* var(--orange) */
+  line-height: 18px;
+}
+
+/* ===== 第二张卡 ===== */
+/* 顶部小字行（黑色、居中） */
+.line{
+  text-align:center;
+  font-size:12px;
+  margin-top:2px;
+  margin-bottom:10px;
+}
+
+/* 主体为两列：左（四列宫格），右（竖向四行） */
+.two-col{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;            /* 两组件间距 */
+}
+
+/* —— 左组件：四个并排子组件 —— */
+.left-four{
+  display:grid;
+  margin-top: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* 子组件：上灰下彩（垂直） */
+.meta{
+  font-size: 12px;
+  color: #8f9aae;      /* var(--muted) */
+  text-align: center;
+  line-height: 16px;
+}
+.value{
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 22px;
+}
+
+/* —— 右组件：竖向四行，每行左右并排 —— */
+.right-list{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+.right-item{
+  display:grid;
+  grid-template-columns: auto 1fr;
+  align-items:center;
+  gap:8px;
+}
+
+/* 左侧橘底标签，右侧普通黑字（字号一致） */
+.badge{
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #ffd7b1; 
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  min-width: 24px;
+  text-align: center;
+}
+.item-text{
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+}
