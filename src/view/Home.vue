@@ -3,7 +3,7 @@
     <div class="calendar_nav">
       <div class="calendar_nav_back"></div>
       <div class="calendar_nav_date" @click="showpicker = true">
-        {{ nowyear }}年{{ nowmonth }}月<Icon name="arrow-down" />
+        {{ nowyear }}年{{ nowmonth }}月{{ selectDate.getDay() }}日 {{ selectDate.getHour() }}:{{ String(selectDate.getMinute()).padStart(2, '0') }}<Icon name="arrow-down" />
       </div>
       <div class="calendar_nav_jin">
         <div class="cnj" @click="backToToday">
@@ -64,14 +64,14 @@
       <Overlay
         class="calendar_picker"
         :show="showpicker"
-        @click="showpicker = false"
       >
         <div class="wrapper">
-          <datePicker v-if="showpicker" class="block" @confirm="confirm" />
+          <datePicker v-if="showpicker" class="block" @confirm="confirm" @close="showpicker = false" :selectDate="selectDate" />
         </div>
       </Overlay>
     </div>
-    <div class="showinfo">
+
+    <!-- <div class="showinfo">
       <div class="showinfo_yili">
         <Icon
           class="showinfo_yili_icon"
@@ -90,13 +90,13 @@
         </div>
         <Icon class="showinfo_yili_icon" @click="nextDay(1)" name="arrow" />
       </div>
-    </div>
+    </div> -->
 
     <div class="card_wrap">
       <!-- 第一张卡 -->
       <section class="card card-1">
         <div class="small-title">本日的五行日主是：</div>
-        <img :src="wuxingFirstCharMap[dateinfo.tiangan]?.imageUrl" alt="五行图标" />
+        <img :src="wuxingFirstCharMap[dateinfo.tiangan]?.imageUrl" alt="五行图标" style="width: 50%; height: auto; aspect-ratio: 1/1;" />
         <h3 class="elem-name" :style="{ color: wuxingFirstCharMap[dateinfo.tiangan]?.color }">{{ wuxingFirstCharMap[dateinfo.tiangan]?.name }}</h3>
         <p class="elem-desc" :style="{ color: wuxingFirstCharMap[dateinfo.tiangan]?.color }">{{ wuxingFirstCharMap[dateinfo.tiangan]?.description }}</p>
       </section>
@@ -135,9 +135,9 @@
             <div>
               <div class="meta">时</div>
               <div class="value">
-                <span :style="{ color: wuxingFirstCharMap[dateinfo.wuxing.charAt(0)]?.color }">{{ dateinfo.wuxing.charAt(0) }}</span>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhihour.charAt(0)]?.color }">{{ dateinfo.ganzhihour.charAt(0) }}</span>
                 <br><br>
-                <span :style="{ color: wuxingFirstCharMap[dateinfo.wuxing.charAt(1)]?.color }">{{ dateinfo.wuxing.charAt(1) }}</span>
+                <span :style="{ color: wuxingFirstCharMap[dateinfo.ganzhihour.charAt(1)]?.color }">{{ dateinfo.ganzhihour.charAt(1) }}</span>
               </div>
             </div>
           </div>
@@ -349,6 +349,7 @@ const dateinfo = reactive<any>({
   ganzhimonth: "",
   weeks: 0,
   ganzhiday: "",
+  ganzhihour: "", // 新增属性，存储时柱
   dayyi: [],
   dayji: [],
   wuxing: "",
@@ -374,6 +375,7 @@ const getDateInfo = (item: any) => {
     "年";
   dateinfo.ganzhimonth = item.getLunar().getMonthInGanZhi();
   dateinfo.ganzhiday = item.getLunar().getDayInGanZhi();
+  dateinfo.ganzhihour = item.getLunar().getTimeInGanZhi();
   dateinfo.weeks = getYearWeek(item.getYear(), item.getMonth(), item.getDay());
   dateinfo.dayyi = item.getLunar().getDayYi();
   dateinfo.dayji = item.getLunar().getDayJi();
@@ -419,6 +421,7 @@ const confirm = (item: any) => {
   nowmonth.value = item.getMonth();
   nowyear.value = item.getYear();
   datelist.value = getContent(nowyear.value, nowmonth.value);
+  getDateInfo(item);
 };
 
 //回到今天
