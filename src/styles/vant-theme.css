@@ -1,0 +1,12 @@
+/* 不能加 scoped；写在全局 */
+:root {
+  --van-primary-color:  rgba(252, 151, 1, 1); /* 主色 */
+  --van-success-color:  #07c160;
+  --van-warning-color:  #ffff1f;
+  --van-danger-color:   #ee0a24;
+  --van-text-color:     #323233;
+  --van-active-color:   #f2f3f5;
+  /* 需要的话继续覆盖组件级变量，如按钮主色 */
+  --van-button-primary-background:   #0052d9;
+  --van-button-primary-border-color: #0052d9;
+}
