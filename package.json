@@ -12,6 +12,8 @@
     "start-all": "concurrently \"npm run dev\" \"npm run auth-server\" \"npm run upload-server\""
   },
   "dependencies": {
+    "@better-scroll/core": "^2.5.1",
+    "@better-scroll/wheel": "^2.5.1",
     "@kanface/utils": "^1.0.6",
     "@vant/area-data": "^1.3.2",
     "axios": "^0.27.2",

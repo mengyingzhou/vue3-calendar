@@ -19,5 +19,6 @@ import JBottom from "@/components/JBottom.vue";
 html,
 body{
     background-color: #ffffff;
+    padding-bottom: 30px;
 }
 </style>

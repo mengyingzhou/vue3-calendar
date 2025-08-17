@@ -66,7 +66,7 @@
         :show="showpicker"
       >
         <div class="wrapper">
-          <datePicker v-if="showpicker" class="block" @confirm="confirm" @close="showpicker = false" :selectDate="selectDate" />
+          <PickerDate ref="dateRef" v-model="dateStr" v-model:show="showpicker" @confirm="confirm" @close="showpicker = false" :selectDate="selectDate"/>
         </div>
       </Overlay>
     </div>
@@ -270,6 +270,7 @@ import { Solar, SolarMonth, HolidayUtil, Lunar } from "lunar-typescript";
 import weeklist from "@/utils/weeklist";
 import { Overlay, Icon } from "vant";
 import datePicker from "@/components/datepicker.vue";
+import PickerDate from "@/components/kuipicker/picker-date/PickerDate.vue";
 import { reactive, ref } from "vue";
 import { getYearWeek } from "../utils/getweeks";
 import { useRouter } from "vue-router";
@@ -413,6 +414,9 @@ const nextDay = (val: number) => {
   selectDay(selectDate.value);
   // getDateInfo(selectDate.value);
 };
+
+const dateStr = ref('农历 2025-7-28 11:40');
+
 
 //选择时间
 const confirm = (item: any) => {
