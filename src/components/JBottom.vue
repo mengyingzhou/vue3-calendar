@@ -65,7 +65,6 @@ const { active } = toRefs(state);
 
 .subscription-tabbar {
     background-color: var(--van-primary-color) !important;
-    border-top: 1px solid #eee;
     height: auto !important;
     padding: 5px 0;
     font-size: 12px;

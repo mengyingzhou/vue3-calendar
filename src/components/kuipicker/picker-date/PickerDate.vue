@@ -30,7 +30,7 @@ const props = defineProps({
     modelValue: String,
     show: Boolean,
 })
-const emit = defineEmits(['update:modelValue', 'update:show'])
+const emit = defineEmits(['update:modelValue', 'update:show', 'confirm', 'close'])
 
 const visible = ref(props.show)
 const lifaArr = ['公', '农'];
@@ -53,10 +53,12 @@ function show(){
 function hide() {
     visible.value = false
     emit('update:show', false)
+    emit('close')
 }
 
 function onConfirm() {
     emit('update:modelValue', date.value)
+    emit('confirm', date.value)
     hide()
 }
 defineExpose({

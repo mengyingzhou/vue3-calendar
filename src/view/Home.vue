@@ -3,7 +3,7 @@
     <div class="calendar_nav">
       <div class="calendar_nav_back"></div>
       <div class="calendar_nav_date" @click="showpicker = true">
-        {{ nowyear }}年{{ nowmonth }}月{{ selectDate.getDay() }}日 {{ selectDate.getHour() }}:{{ String(selectDate.getMinute()).padStart(2, '0') }}<Icon name="arrow-down" />
+        {{ dateStr.startsWith('农历') ? '农历 ' + nowyear + '年' + dateinfo.yinli : '公历 ' + nowyear + '年' + nowmonth + '月' + selectDate.getDay() + '日' }} {{ selectDate.getHour() }}:{{ String(selectDate.getMinute()).padStart(2, '0') }}<Icon name="arrow-down" />
       </div>
       <div class="calendar_nav_jin">
         <div class="cnj" @click="backToToday">
@@ -341,6 +341,7 @@ const selectDay = (item: any) => {
   nowyear.value = selectDate.value.getYear();
   getDateInfo(item);
   datelist.value = getContent(nowyear.value, nowmonth.value);
+  dateStr.value = `${dateType.value} ${selectDate.value.getYear()}-${selectDate.value.getMonth()}-${selectDate.value.getDay()} ${selectDate.value.getHour()}:00`;
 };
 
 /**获取选中天对应信息 */
@@ -415,17 +416,65 @@ const nextDay = (val: number) => {
   // getDateInfo(selectDate.value);
 };
 
-const dateStr = ref('农历 2025-7-28 11:40');
+// 保存日期类型（公历/农历）
+const dateType = ref('公历');
+const dateStr = ref(`公历 ${todayins.getYear()}-${todayins.getMonth()}-${todayins.getDay()} ${todayins.getHour()}:00`);
 
 
 //选择时间
 const confirm = (item: any) => {
-  selectDay(item);
-  selectDate.value = item;
-  nowmonth.value = item.getMonth();
-  nowyear.value = item.getYear();
-  datelist.value = getContent(nowyear.value, nowmonth.value);
-  getDateInfo(item);
+  // 检查 item 是否为字符串（新组件返回的格式）
+  if (typeof item === 'string') {
+    dateStr.value = item;
+    // 解析字符串格式的日期，格式如："公历 2025-7-28 11:40" 或 "农历 2025-7-28 11:40"
+    const isLunar = item.startsWith('农历');
+    // 更新日期类型
+    dateType.value = isLunar ? '农历' : '公历';
+    const dateMatch = item.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
+    
+    if (dateMatch) {
+      const year = parseInt(dateMatch[1]);
+      const month = parseInt(dateMatch[2]);
+      const day = parseInt(dateMatch[3]);
+      const hour = parseInt(dateMatch[4]);
+      const minute = parseInt(dateMatch[5]);
+      
+      let solarDate;
+      
+      if (isLunar) {
+        // 如果是农历，先创建 Lunar 对象，再转换为 Solar 对象
+        try {
+          const lunarDate = Lunar.fromYmdHms(year, month, day, hour, minute, 0);
+          solarDate = lunarDate.getSolar();
+          console.log('转换农历日期:', item, '转换结果:', solarDate.toString());
+        } catch (error) {
+          console.error('农历转换错误:', error);
+          // 转换失败时使用当前日期
+          solarDate = Solar.fromDate(new Date());
+        }
+      } else {
+        // 公历直接创建 Solar 对象
+        solarDate = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+      }
+      
+      // 更新选中日期
+      selectDay(solarDate);
+      selectDate.value = solarDate;
+      nowmonth.value = solarDate.getMonth();
+      nowyear.value = solarDate.getYear();
+      datelist.value = getContent(nowyear.value, nowmonth.value);
+      getDateInfo(solarDate);
+    }
+  } else {
+    // 原有逻辑，处理 Solar 对象
+    selectDay(item);
+    selectDate.value = item;
+    nowmonth.value = item.getMonth();
+    nowyear.value = item.getYear();
+    datelist.value = getContent(nowyear.value, nowmonth.value);
+    getDateInfo(item);
+    dateStr.value = `公历 ${selectDate.value.getYear()}-${selectDate.value.getMonth()}-${selectDate.value.getDay()} ${selectDate.value.getHour()}:00`;
+  }
 };
 
 //回到今天

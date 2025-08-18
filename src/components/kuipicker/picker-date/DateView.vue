@@ -82,15 +82,15 @@ const monthList = computed(() => {
             value: month,
         };
     });
-    // 农历闰月
-    const leap = Nongli.leapMonth(year)
-    if (lifa === '农' && leap) {
-        yueArr.splice(leap, 0, {
-            label: "闰" + yue[leap - 1],
-            value: -leap,
-            leap: true,
-        });
-    }
+    // // 农历闰月
+    // const leap = Nongli.leapMonth(year)
+    // if (lifa === '农' && leap) {
+    //     yueArr.splice(leap, 0, {
+    //         label: "闰" + yue[leap - 1],
+    //         value: -leap,
+    //         leap: true,
+    //     });
+    // }
 
     return yueArr
 })
@@ -158,7 +158,15 @@ function emitValue() {
     console.log(dateStr.value);
     
     emit('update:modelValue', dateStr.value);
-    emit('change', { date: dateObj.value, value: dateStr.value });
+    emit('change', { 
+        date: dateObj.value, 
+        value: dateStr.value,
+        year: dateObj.value.$y,
+        month: dateObj.value.$Mo,
+        day: dateObj.value.$D,
+        hour: dateObj.value.$H,
+        minute: dateObj.value.$m
+    });
 }
 </script>
 
