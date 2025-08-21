@@ -39,6 +39,7 @@
             ]"
           />
           
+          <!-- 生日功能已隐藏
           <van-field
             name="birthdate"
             label="生日"
@@ -54,6 +55,7 @@
               />
             </template>
           </van-field>
+          -->
           
           <van-field
             name="gender"
@@ -171,7 +173,7 @@ const userInfo = reactive({
   username: '',
   email: '',
   phone: '',
-  birthdate: '',
+  // birthdate: '',
   gender: ''
 });
 
@@ -250,10 +252,11 @@ const confirmLogout = () => {
     });
 };
 
+// 生日功能已移除
 // 处理生日日期变更
-const onBirthDateChange = () => {
-  // 可以在这里添加验证逻辑
-};
+// const onBirthDateChange = () => {
+//   // 可以在这里添加验证逻辑
+// };
 
 // 页面加载时获取用户信息
 onMounted(() => {

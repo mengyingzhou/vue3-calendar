@@ -35,10 +35,10 @@ async function connectToMongo() {
 // 用户注册
 app.post('/api/register', async (req, res) => {
   try {
-    const { phone, email, username, password, birthdate, gender } = req.body;
+    const { phone, email, username, password, /* birthdate, */ gender } = req.body;
 
     // 验证必填字段
-    if ((!email && !phone) || !username || !password || !birthdate || !gender) {
+    if ((!email && !phone) || !username || !password || /* !birthdate || */ !gender) {
       return res.status(400).json({ message: '用户名、密码、出生日期和性别都是必填的，邮箱和手机号至少需要提供一个' });
     }
 
@@ -86,7 +86,7 @@ app.post('/api/register', async (req, res) => {
       phone,
       username,
       password: hashedPassword,
-      birthdate,
+      // birthdate,
       gender,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -201,10 +201,10 @@ const authenticateToken = (req, res, next) => {
 app.put('/api/user/update', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { username, email, phone, birthdate, gender } = req.body;
+    const { username, email, phone, /* birthdate, */ gender } = req.body;
 
     // 验证必填字段
-    if (!username || !email || !phone || !birthdate || !gender) {
+    if (!username || !email || !phone || /* !birthdate || */ !gender) {
       return res.status(400).json({ message: '所有字段都是必填的' });
     }
 
@@ -255,7 +255,7 @@ app.put('/api/user/update', authenticateToken, async (req, res) => {
           username,
           email,
           phone,
-          birthdate,
+          // birthdate,
           gender,
           updatedAt: new Date()
         }

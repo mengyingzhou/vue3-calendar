@@ -6,7 +6,9 @@
   --van-danger-color:   #ee0a24;
   --van-text-color:     #323233;
   --van-active-color:   #f2f3f5;
-  /* 需要的话继续覆盖组件级变量，如按钮主色 */
-  --van-button-primary-background:   #0052d9;
-  --van-button-primary-border-color: #0052d9;
+}
+
+/* 设置所有 van-button 背景透明且无边框 */
+.van-button {
+  border: none !important;
 }

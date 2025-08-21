@@ -37,7 +37,7 @@
       <van-grid :border="false" :column-num="3">
         <van-grid-item @click="goToStarDays">
           <template #icon>
-            <van-icon name="star" color="#ff9900" size="28" />
+            <van-image width="65" height="65" src="/src/assets/icon/我的页面/已收藏日.png" />
           </template>
           <template #text>
             <span>已收藏日</span>
@@ -45,7 +45,7 @@
         </van-grid-item>
         <van-grid-item>
           <template #icon>
-            <van-icon name="bookmark" color="#3f45ff" size="28" />
+            <van-image width="65" height="65" src="/src/assets/icon/我的页面/独家课程.png" />
           </template>
           <template #text>
             <span>独家课程</span>
@@ -53,7 +53,7 @@
         </van-grid-item>
         <van-grid-item>
           <template #icon>
-            <van-icon name="gift" color="#ff4444" size="28" />
+            <van-image width="65" height="65" src="/src/assets/icon/我的页面/好运物品.png" />
           </template>
           <template #text>
             <span>好运物品</span>
@@ -63,7 +63,13 @@
     </van-cell-group>
 
     <!-- 小蚊子独家课程 -->
-    <van-cell-group inset title="小蚊子独家课程" class="content-group">
+    <van-cell-group inset class="content-group">
+      <template #title>
+        <div class="custom-title">
+          <van-image width="30" height="30" src="src/assets/icon/我的页面/课程.png" class="title-icon" />
+          <span>小蚊子独家课程</span>
+        </div>
+      </template>
       <van-cell 
         v-for="(item, index) in courseRecommendations" 
         :key="index" 
@@ -85,7 +91,13 @@
     </van-cell-group>
 
     <!-- 热门文章推荐 -->
-    <van-cell-group inset title="热门文章推荐" class="content-group">
+    <van-cell-group inset class="content-group">
+      <template #title>
+        <div class="custom-title">
+          <van-image width="30" height="30" src="src/assets/icon/我的页面/文章1.png" class="title-icon" />
+          <span>热门文章推荐</span>
+        </div>
+      </template>
       <van-cell 
         v-for="(item, index) in articleRecommendations" 
         :key="index" 
@@ -97,7 +109,13 @@
     </van-cell-group>
 
     <!-- 好运物品推荐 -->
-    <van-cell-group inset title="好运物品推荐" class="content-group">
+    <van-cell-group inset class="content-group">
+      <template #title>
+        <div class="custom-title">
+          <van-image width="30" height="30" src="src/assets/icon/我的页面/好运物.png" class="title-icon" />
+          <span>好运物品推荐</span>
+        </div>
+      </template>
       <van-cell 
         v-for="(item, index) in luckyItemRecommendations" 
         :key="index" 
@@ -350,6 +368,22 @@ const goToStarDays = () => {
   font-weight: bold;
   color: #333;
   margin: 0;
+}
+
+.custom-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .title-icon {
+    flex-shrink: 0;
+  }
+  
+  span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
 }
 
 :deep(.van-grid-item__content) {

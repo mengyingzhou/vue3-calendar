@@ -1,5 +1,5 @@
 <template>
-    <button class="pointer-events-auto rounded-md px-3 py-2 text-[0.8125rem]/5 font-semibold">
+    <button class="pointer-events-auto rounded-md px-3 py-2 text-[0.8125rem]/5 font-semibold bg-white">
         {{ label }}
         <slot />
     </button>
@@ -31,11 +31,15 @@ defineProps({
 }
 
 .text-\[0\.8125rem\]\/5 {
-    font-size: 0.8125rem;
+    font-size: 1.2rem;
     line-height: 1.25rem;
 }
 
 .font-semibold {
     font-weight: 600;
+}
+
+.bg-white {
+    background-color: #ffffff;
 }
 </style>

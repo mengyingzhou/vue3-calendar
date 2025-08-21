@@ -46,7 +46,7 @@ interface User {
   phone: string;
   email: string;
   username: string;
-  birthdate?: string;
+  // birthdate?: string;
   gender?: string;
 }
 
@@ -56,7 +56,7 @@ interface RegisterRequest {
   email: string;
   username: string;
   password: string;
-  birthdate: string;
+  // birthdate: string;
   gender: string;
 }
 
@@ -233,7 +233,7 @@ export const AuthService = {
     username: string;
     phone: string;
     email: string;
-    birthdate: string;
+    // birthdate: string;
     gender: string;
   }): Promise<{ message: string }> {
     try {

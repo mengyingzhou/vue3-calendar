@@ -102,7 +102,6 @@ const { active } = toRefs(state);
     text-decoration: none;
     padding: 2px 8px;
     border-radius: 10px;
-    border: 1px solid #000000;
     font-size: 12px;
     display: inline-block;
 }

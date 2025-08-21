@@ -68,6 +68,7 @@
             ]"
             :error-message="errors.confirmPassword"
           />
+          <!-- 生日功能已隐藏
           <van-field
             name="birthdate"
             label="生日"
@@ -84,6 +85,7 @@
               />
             </template>
           </van-field>
+          -->
 
           <van-field
             name="gender"
@@ -143,7 +145,7 @@ interface RegisterRequest {
   email: string;
   username: string;
   password: string;
-  birthdate: string;
+  // birthdate: string;
   gender: string;
 }
 
@@ -156,7 +158,7 @@ const form = reactive({
   username: '',
   password: '',
   confirmPassword: '',
-  birthdate: '',  // 改为字符串类型
+  // birthdate: '',  // 改为字符串类型
   gender: ''
 });
 
@@ -166,15 +168,15 @@ const errors = reactive({
   username: '',
   password: '',
   confirmPassword: '',
-  birthdate: '',
+  // birthdate: '',
   gender: '',
   general: ''
 });
 
 // 处理生日日期变更
-const onBirthdateChange = () => {
-  errors.birthdate = '';
-};
+// const onBirthdateChange = () => {
+//   errors.birthdate = '';
+// };
 
 const validateConfirmPassword = () => {
   return form.password === form.confirmPassword;
@@ -190,11 +192,11 @@ const register = async () => {
 
   try {
     // 表单验证
-    if (!form.birthdate) {
-      errors.birthdate = '请选择生日';
-      isSubmitting.value = false;
-      return;
-    }
+    // if (!form.birthdate) {
+    //   errors.birthdate = '请选择生日';
+    //   isSubmitting.value = false;
+    //   return;
+    // }
 
     if (!form.gender) {
       errors.gender = '请选择性别';
@@ -221,7 +223,7 @@ const register = async () => {
       email: form.email,
       username: form.username,
       password: form.password,
-      birthdate: form.birthdate,
+      // birthdate: form.birthdate,
       gender: form.gender
     });
 
@@ -244,8 +246,8 @@ const register = async () => {
           errors.username = message;
         } else if (message.includes('密码')) {
           errors.password = message;
-        } else if (message.includes('生日')) {
-          errors.birthdate = message;
+        // } else if (message.includes('生日')) {
+          // errors.birthdate = message;
         } else if (message.includes('性别')) {
           errors.gender = message;
         } else {

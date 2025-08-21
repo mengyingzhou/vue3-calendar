@@ -1,18 +1,18 @@
 <template>
     <Dialog v-model="visible">
-        <div class="date-card bg-white shadow-lg border border-gray-200 border-solid rounded-lg">
+        <div class="date-card bg-white rounded-lg">
             <div class="flex p-1">
-                <Btn label="取消" class="border border-red-500 text-red-500 hover:bg-red-100 hover:text-red-700"
+                <Btn label="取消" class="border-0 text-red-500 hover:bg-red-100 hover:text-red-700"
                     @click="hide" />
                 <div class="flex-1 flex justify-center">
-                    <div class="flex border border-blue-300 rounded-lg p-1">
-                        <button v-for="(vo, i) in lifaArr" :key="i" class="px-2 rounded-md"
+                    <div class="flex rounded-lg p-1">
+                        <button v-for="(vo, i) in lifaArr" :key="i" class="px-2 rounded-md border-0"
                             :class="[vo == lifa ? 'text-white bg-blue-500' : '']" @click="lifa = vo">
                             {{ vo }}历
                         </button>
                     </div>
                 </div>
-                <Btn label="确定" class="border border-sky-500 text-sky-500 hover:bg-sky-100 hover:text-sky-700"
+                <Btn label="确定" class="border-0"
                     @click="onConfirm" />
             </div>
             <DateView v-model="date" :lifa="lifa" />
@@ -70,6 +70,9 @@ defineExpose({
 <style>
 .date-card {
     width: 320px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: none !important;
+    overflow: hidden;
 }
 
 .flex {
@@ -77,7 +80,7 @@ defineExpose({
 }
 
 .p-1 {
-    padding: 0.25rem;
+    padding: 0.5rem;
 }
 
 .flex-1 {
@@ -94,27 +97,27 @@ defineExpose({
 }
 
 .border-red-500 {
-    border-color: rgb(239, 68, 68);
+    border-color: var(--van-danger-color);
 }
 
 .border-blue-300 {
-    border-color: rgb(147, 197, 253);
+    border-color: var(--van-primary-color);
 }
 
 .border-sky-500 {
-    border-color: rgb(14, 165, 233);
+    border-color: var(--van-primary-color);
 }
 
 .border-gray-200 {
-    border-color: rgb(229, 231, 235);
+    border-color: rgba(229, 231, 235, 0.5);
 }
 
 .rounded-lg {
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
 }
 
 .rounded-md {
-    border-radius: 0.375rem;
+    border-radius: 0.2rem;
 }
 
 .bg-white {
@@ -122,7 +125,7 @@ defineExpose({
 }
 
 .bg-blue-500 {
-    background-color: rgb(59, 130, 246);
+    background-color: var(--van-primary-color);
 }
 
 .text-red-500 {
@@ -130,35 +133,41 @@ defineExpose({
 }
 
 .text-sky-500 {
-    color: rgb(14, 165, 233);
+    color: var(--van-primary-color);
 }
 
 .text-white {
     color: rgb(255, 255, 255);
 }
 
-.shadow-lg {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
 
 .px-2 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    transition: all 0.2s ease;
 }
 
-.hover\:bg-red-100:hover {
-    background-color: rgb(254, 226, 226);
+
+/* 新增扁平化样式 */
+.border-0 {
+    border: none !important;
 }
 
-.hover\:bg-sky-100:hover {
-    background-color: rgb(224, 242, 254);
+button {
+    background-color: #ffffff;
+    outline: none;
+    user-select: none;
+    cursor: pointer;
+    font-weight: 500;
 }
 
-.hover\:text-red-700:hover {
-    color: rgb(185, 28, 28);
+button:focus {
+    outline: none;
 }
 
-.hover\:text-sky-700:hover {
-    color: rgb(3, 105, 161);
+.date-card button {
+    transition: all 0.2s ease;
 }
 </style>

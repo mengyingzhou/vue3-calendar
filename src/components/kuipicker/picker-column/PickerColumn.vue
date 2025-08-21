@@ -172,7 +172,7 @@ onMounted(initScroll)
 }
 
 .current {
-    color: #3b82f6;
+    color: var(--van-primary-color);
     font-weight: 500;
 }
 
