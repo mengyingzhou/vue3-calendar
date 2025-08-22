@@ -365,6 +365,148 @@ app.get('/api/user', authenticateToken, async (req, res) => {
   }
 });
 
+// 查询收藏日
+app.get('/api/date-collection', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    // 查询用户的所有收藏日
+    const collections = await db.collection('date_collection').find(
+      { userId: new ObjectId(userId) }
+    ).toArray();
+    
+    res.status(200).json({ 
+      message: '查询成功',
+      collections 
+    });
+  } catch (error) {
+    console.error('查询收藏日错误:', error);
+    res.status(500).json({ message: '服务器错误，请稍后再试' });
+  }
+});
+
+// 增加新的收藏日
+app.post('/api/add-date', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { dateString } = req.body;
+    
+    // 验证必填字段
+    if (!dateString) {
+      return res.status(400).json({ message: '日期字符串是必填的' });
+    }
+    
+    // 获取用户信息以获取性别
+    const user = await db.collection('user_profile').findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { gender: "男生" } }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    
+    // 创建新的收藏日记录
+    const newCollection = {
+      userId: new ObjectId(userId),
+      dateString,
+      relation: '自己',  // 默认关系为"自己"
+      gender: user.gender,  // 默认性别为用户性别
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    // 保存到数据库
+    const result = await db.collection('date_collection').insertOne(newCollection);
+    
+    res.status(201).json({
+      message: '收藏日添加成功',
+      collection: {
+        id: result.insertedId,
+        ...newCollection
+      }
+    });
+  } catch (error) {
+    console.error('添加收藏日错误:', error);
+    res.status(500).json({ message: '服务器错误，请稍后再试' });
+  }
+});
+
+// 更新收藏日信息
+app.put('/api/update-date', authenticateToken, async (req, res) => {
+  try {
+    const { id, relation, gender } = req.body;
+    
+    // 验证必填字段
+    if (!relation || !gender) {
+      return res.status(400).json({ message: '关系和性别都是必填的' });
+    }
+    
+    // 检查收藏日是否存在且属于当前用户
+    const existingCollection = await db.collection('date_collection').findOne(
+      { _id: new ObjectId(id) }
+    );
+    
+    if (!existingCollection) {
+      return res.status(404).json({ message: '收藏日不存在' });
+    }
+    
+    // 更新收藏日信息
+    const result = await db.collection('date_collection').updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          relation,
+          gender,
+          updatedAt: new Date()
+        }
+      }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: '更新收藏日接口失败' });
+    }
+    
+    res.status(200).json({ message: '收藏日信息更新成功' });
+  } catch (error) {
+    console.error('更新收藏日错误:', error);
+    res.status(500).json({ message: '服务器错误，请稍后再试' });
+  }
+});
+
+// 删除收藏日
+app.delete('/api/delete-date/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const collectionId = req.params.id;
+    
+    // 检查收藏日是否存在且属于当前用户
+    const existingCollection = await db.collection('date_collection').findOne({
+      _id: new ObjectId(collectionId),
+      userId: new ObjectId(userId)
+    });
+    
+    if (!existingCollection) {
+      return res.status(404).json({ message: '收藏日不存在或不属于当前用户' });
+    }
+    
+    // 删除收藏日
+    const result = await db.collection('date_collection').deleteOne({
+      _id: new ObjectId(collectionId),
+      userId: new ObjectId(userId)
+    });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: '收藏日不存在' });
+    }
+    
+    res.status(200).json({ message: '收藏日删除成功' });
+  } catch (error) {
+    console.error('删除收藏日错误:', error);
+    res.status(500).json({ message: '服务器错误，请稍后再试' });
+  }
+});
+
 // 启动服务器
 async function startServer() {
   await connectToMongo();

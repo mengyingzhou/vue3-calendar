@@ -191,7 +191,7 @@ export const AuthService = {
         if (error.response && error.response.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          // window.location.href = '/login';
         }
         return Promise.reject(error);
       }
@@ -205,8 +205,8 @@ export const AuthService = {
         localStorage.removeItem('user');
       }
       
-      // 重定向到登录页面
-      window.location.href = '/login';
+      // // 重定向到登录页面
+      // window.location.href = '/login';
     }, 0);
   },
 

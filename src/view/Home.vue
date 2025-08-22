@@ -6,9 +6,12 @@
         {{ dateStr.startsWith('农历') ? '农历 ' + nowyear + '年' + dateinfo.yinli : '公历 ' + nowyear + '年' + nowmonth + '月' + selectDate.getDay() + '日' }} {{ selectDate.getHour() }}:{{ String(selectDate.getMinute()).padStart(2, '0') }}<Icon name="arrow-down" />
       </div>
       <div class="calendar_nav_jin">
-        <div class="cnj" @click="backToToday">
-          <div class="cnj_inner">今</div>
-        </div>
+        <img 
+          :src="isDateFavorited ? 'src/assets/icon/首页/已收藏.png' : 'src/assets/icon/首页/未收藏.png'" 
+          @click="saveFavoriteDate" 
+          class="favorite-icon"
+          alt="收藏图标"
+        />
       </div>
     </div>
     <div class="calendar">
@@ -268,14 +271,15 @@
 <script lang="ts" setup>
 import { Solar, SolarMonth, HolidayUtil, Lunar } from "lunar-typescript";
 import weeklist from "@/utils/weeklist";
-import { Overlay, Icon } from "vant";
+import { Overlay, Icon, Toast } from "vant";
 import datePicker from "@/components/datepicker.vue";
 import PickerDate from "@/components/kuipicker/picker-date/PickerDate.vue";
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { getYearWeek } from "../utils/getweeks";
 import { useRouter } from "vue-router";
 import { wuxingFirstCharMap, tiaohouMap } from "../config/wuxing";
 import { getConstellationByDate } from "../config/constellation";
+import { DateService } from '@/utils/date';
 
 const showpicker = ref(false);
 //固定年月,用于判断当前时间
@@ -335,13 +339,22 @@ const isWork = (item: any) => {
 //选中日期,默认当天
 const selectDate = ref(todayins);
 
-const selectDay = (item: any) => {
+const selectDay = async (item: any) => {
   selectDate.value = item;
   nowmonth.value = selectDate.value.getMonth();
   nowyear.value = selectDate.value.getYear();
   getDateInfo(item);
   datelist.value = getContent(nowyear.value, nowmonth.value);
   dateStr.value = `${dateType.value} ${selectDate.value.getYear()}-${selectDate.value.getMonth()}-${selectDate.value.getDay()} ${selectDate.value.getHour()}:00`;
+  
+  const user = localStorage.getItem('user');
+  // 只有在用户已登录时才检查收藏状态
+  if (user) {
+    await checkIfDateFavorited();
+  } else {
+    // 用户未登录时，直接设置为未收藏状态
+    isDateFavorited.value = false;
+  }
 };
 
 /**获取选中天对应信息 */
@@ -401,7 +414,8 @@ const getDateInfo = (item: any) => {
   dateinfo.times.pop();
 };
 getDateInfo(todayins);
-(window as any).dateinfo = dateinfo
+(window as any).dateinfo = dateinfo;
+
 /**
  * @description: 正数为下一天,负数为上一天
  * @param {number} val
@@ -481,7 +495,87 @@ const confirm = (item: any) => {
 const backToToday = () => {
   confirm(todayins);
 };
+
+const isDateFavorited = ref(false);
+
+// 检查当前日期是否已被收藏
+const checkIfDateFavorited = async () => {
+  try {
+    // 这边是默认认为用户已登录 因为前面已经做过判断，如果没有登录的话，不会触发checkIfDateFavorited这个函数
+    const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+    const userId = user.id;
+    // 如果用户未登录，直接将收藏状态设为 false
+    if (!user) {
+      isDateFavorited.value = false;
+      return;
+    }
+    
+    const dateString = `${selectDate.value.getYear()}-${selectDate.value.getMonth()}-${selectDate.value.getDay()} ${selectDate.value.getHour()}:00:00`;
+    isDateFavorited.value = await DateService.isDateFavorited(dateString, userId);
+  } catch (error) {
+    console.error('检查收藏状态错误:', error);
+    isDateFavorited.value = false;
+  }
+};
+
+const saveFavoriteDate = async () => {
+  try {
+    const user = localStorage.getItem('user');
+    // 检查用户是否已登录
+    if (!user) {
+      Toast.fail('请先登录');
+      router.push('/login');
+      return;
+    }
+
+    const dateString = `${selectDate.value.getYear()}-${selectDate.value.getMonth()}-${selectDate.value.getDay()} ${selectDate.value.getHour()}:00:00`;
+    
+    const userId = JSON.parse(user).id;    
+    if (isDateFavorited.value) {
+      // 如果已收藏，执行取消收藏逻辑
+      const collections = await DateService.getDateCollections(userId);
+      const collection = collections.find(c => c.dateString === dateString);
+      if (collection) {
+        await DateService.deleteDate(collection._id);
+      }
+      Toast.success('已取消收藏');
+    } else {
+      // 如果未收藏，执行收藏逻辑
+      await DateService.addDate({ dateString: dateString, userId: userId });
+      Toast.success('收藏成功');
+    }
+    
+    // 切换收藏状态
+    isDateFavorited.value = !isDateFavorited.value;
+  } catch (error: any) {
+    console.error('保存收藏日错误:', error.response?.data || error.message);
+    Toast.fail('操作失败，请重试');
+    throw error;
+  }
+};
+
 const router = useRouter();
 const toselect = () => router.push("/select");
+
+const state = reactive({
+    active: Number(localStorage.getItem('tabbarActive')) || 0
+});
+// 监听路由变化，处理日期参数
+watch(() => router.currentRoute.value.query, (query) => {
+  if (query.date) {
+    const [year, month, day] = query.date.split('-').map(Number);
+    const solarDate = Solar.fromYmdHms(year, month, day, 0, 0, 0);
+    selectDay(solarDate);
+    selectDate.value = solarDate;
+    nowmonth.value = solarDate.getMonth();
+    nowyear.value = solarDate.getYear();
+    datelist.value = getContent(nowyear.value, nowmonth.value);
+    getDateInfo(solarDate);
+    
+    // 设置 jbottom 的 index 为 0
+    state.active = 0;
+    localStorage.setItem('tabbarActive', '0');
+  }
+}, { immediate: true });
 </script>
 <style lang="less" src="./Home.less"></style>

@@ -53,7 +53,7 @@ mongosh <<EOF
 use user_database
 
 db.createCollection("user_profile")
-db.createCollection("page_collection")
+db.createCollection("date_collection")
 print("Database and collections created successfully!")
 
 EOF

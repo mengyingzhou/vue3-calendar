@@ -240,7 +240,10 @@ const confirmLogout = () => {
       try {
         isLoggingOut.value = true;
         await AuthService.logout();
-        router.push('/login');
+        router.push('/profile').then(() => {
+          localStorage.setItem('tabbarActive', '1');
+          window.location.reload();
+        });
       } catch (error) {
         Notify({ type: 'danger', message: '退出登录失败' });
       } finally {

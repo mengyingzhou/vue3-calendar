@@ -7,6 +7,7 @@ export interface WuxingElement {
   name: string;         // 五行名称
   description: string;  // 性格描述
   imageUrl: string;     // 图片链接
+  imageUrlStar?: string; // 收藏日的图片链接
   color: string;        // 主色调（十六进制颜色代码）
   secondaryColor?: string; // 次要色调（可选）
   traits?: string[];    // 特质列表（可选）
@@ -19,6 +20,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '甲木',
     description: '参天巨木 刚健中正 追求上进',
     imageUrl: '/src/assets/icon/首页/五行图标/甲木.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-甲木.png',
     color: '#95C924', // 海洋绿
     category: '木',
     traits: ['刚健', '中正', '上进', '坚韧']
@@ -27,6 +29,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '乙木',
     description: '明媚花草 柔韧顽强 懂得进退',
     imageUrl: '/src/assets/icon/首页/五行图标/乙木.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-乙木.png',
     color: '#95C924', // 淡绿色
     category: '木',
     traits: ['柔韧', '顽强', '灵活', '聪慧']
@@ -35,6 +38,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '丙火',
     description: '光明太阳 温暖和煦 热情磊落',
     imageUrl: '/src/assets/icon/首页/五行图标/丙火.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-丙火.png',
     color: '#FF7C5C', // 红橙色
     category: '火',
     traits: ['光明', '温暖', '热情', '磊落']
@@ -43,6 +47,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '丁火',
     description: '幽微烛火 敏感细心 温和谦逊',
     imageUrl: '/src/assets/icon/首页/五行图标/丁火.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-丁火.png',
     color: '#FF7C5C', // 深橙色
     category: '火',
     traits: ['敏感', '细心', '温和', '谦逊']
@@ -51,6 +56,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '戊土',
     description: '稳重高山 踏实可靠 务实保守',
     imageUrl: '/src/assets/icon/首页/五行图标/戊土.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-戊土.png',
     color: '#BF864D', // 马鞍棕色
     category: '土',
     traits: ['稳重', '踏实', '可靠', '务实']
@@ -59,6 +65,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '己土',
     description: '沃野田园 耐心细致 滋养包容',
     imageUrl: '/src/assets/icon/首页/五行图标/己土.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-己土.png',
     color: '#BF864D', // 金菊黄
     category: '土',
     traits: ['耐心', '细致', '滋养', '包容']
@@ -67,6 +74,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '庚金',
     description: '锋利刀剑 干脆果断 锐意进取',
     imageUrl: '/src/assets/icon/首页/五行图标/庚金.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-庚金.png',
     color: '#FFC300', // 银色
     category: '金',
     traits: ['锋利', '果断', '进取', '坚决']
@@ -75,6 +83,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '辛金',
     description: '精致珠宝 追求完美 敏锐聪慧',
     imageUrl: '/src/assets/icon/首页/五行图标/辛金.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-辛金.png',
     color: '#FFC300', // 金色
     category: '金',
     traits: ['精致', '完美', '敏锐', '聪慧']
@@ -83,6 +92,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '壬水',
     description: '江河湖海 自由不羁 灵活应变',
     imageUrl: '/src/assets/icon/首页/五行图标/壬水.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-壬水.png',
     color: '#73C7FF', // 海军蓝
     category: '水',
     traits: ['自由', '不羁', '灵活', '应变']
@@ -91,6 +101,7 @@ export const wuxingElements: WuxingElement[] = [
     name: '癸水',
     description: '绵绵细雨 情感丰富 灵动聪慧',
     imageUrl: '/src/assets/icon/首页/五行图标/癸水.png',
+    imageUrlStar: '/src/assets/icon/我的页面/收藏记录/收藏记录-癸水.png',
     color: '#73C7FF', // 淡蓝色
     category: '水',
     traits: ['细腻', '情感', '灵动', '聪慧']

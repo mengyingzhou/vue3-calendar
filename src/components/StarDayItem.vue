@@ -1,26 +1,95 @@
 <template>
   <div class="star-day-item">
-    <div class="star-day-content" @click="handleClick">
+    <div class="star-day-content">
       <div class="image-container">
         <img :src="imageUrl" alt="日期图片" class="day-image">
       </div>
       <div class="day-info">
         <div class="date">{{ formattedSolarDate }}</div>
         <div class="lunar-date">{{ formattedLunarDate }}</div>
+        <div class="relation-gender" v-if="props.relation && props.gender">
+          <span>{{ props.relation }}</span>
+          <span>{{ props.gender }}</span>
+        </div>
       </div>
         <van-icon 
-          name="star" 
-          class="star-icon" 
+          name="src/assets/icon/我的页面/收藏记录/edit-text.png" 
+          class="edit-icon" 
           :color="starColor" 
-          @click="handleStarClick"
+          @click="handleEditPopup"
         />
-      <van-icon name="arrow" class="arrow-icon" />
+
+        <!-- 编辑弹窗 -->
+        <van-popup 
+          v-model:show="showEditPopup" 
+          position="bottom" 
+          round
+          :style="{ height: 'auto', maxHeight: '70%', backgroundColor: '#f7f8fa', padding: '10px 0' }"
+        >
+          <div class="popup-header">
+            <van-icon name="cross" class="close-icon" @click="showEditPopup = false" />
+            <h3>编辑信息</h3>
+          </div>
+          
+          <div class="popup-content">
+            <!-- 关系选择卡片 -->
+            <div class="card">
+              <h4>请选择关系</h4>
+              <div class="button-group">
+                <van-button 
+                  v-for="relation in ['自己', '伴侣', '家人', '朋友', '其他']" 
+                  :key="relation"
+                  plain
+                  :style="{
+                    backgroundColor: selectedRelation === relation ? 'var(--van-primary-color)' : '#f5f5f5',
+                    color: selectedRelation === relation ? '#fff' : '#333'
+                  }"
+                  @click="selectRelation(relation)"
+                >
+                  {{ relation }}
+                </van-button>
+              </div>
+            </div>
+            
+            <!-- 性别选择卡片 -->
+            <div class="card">
+              <h4>请选择性别</h4>
+              <div class="button-group">
+                <van-button 
+                  v-for="gender in ['男生', '女生']" 
+                  :key="gender"
+                  plain
+                  :style="{
+                    backgroundColor: selectedGender === gender ? 'var(--van-primary-color)' : '#f5f5f5',
+                    color: selectedGender === gender ? '#fff' : '#333'
+                  }"
+                  @click="selectGender(gender)"
+                >
+                  {{ gender }}
+                </van-button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="popup-footer">
+            <van-button 
+              type="primary" 
+              block
+              @click="confirmEdit"
+            >
+              确认
+            </van-button>
+          </div>
+        </van-popup>
+      <van-icon name="arrow" class="arrow-icon" @click="handleArrowClick" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { DateService } from '@/utils/date';
+import { Toast } from 'vant';
+import { computed, ref, onMounted } from 'vue';
 
 // 定义组件接收的属性
 const props = defineProps({
@@ -50,6 +119,18 @@ const props = defineProps({
   isStarred: {
     type: Boolean,
     default: true
+  },
+  relation: {
+    type: String,
+    default: ''
+  },
+  gender: {
+    type: String,
+    default: ''
+  },
+  id: {
+    type: String,
+    required: true
   }
 });
 
@@ -110,17 +191,82 @@ const formattedLunarDate = computed(() => {
 const starColor = computed(() => props.isStarred ? '#ff9900' : '#ddd');
 
 // 定义点击事件
-const emit = defineEmits(['click', 'toggleStar']);
+const emit = defineEmits(['click', 'toggleStar', 'update:relation', 'update:gender']);
 
-// 处理点击事件
-const handleClick = () => {
-  emit('click', { solar: props.solar, lunar: props.lunar });
+// 编辑弹窗状态
+const showEditPopup = ref(false);
+const selectedRelation = ref('');
+const selectedGender = ref('');
+
+// 显示编辑弹窗
+const handleEditPopup = (event: Event) => {
+  event.stopPropagation();
+  showEditPopup.value = true;
 };
 
-// 处理收藏图标点击
-const handleStarClick = (event: Event) => {
-  event.stopPropagation(); // 阻止事件冒泡
-  emit('toggleStar', { solar: props.solar, lunar: props.lunar });
+// 选择关系
+const selectRelation = (relation: string) => {
+  selectedRelation.value = relation;
+};
+
+// 选择性别
+const selectGender = (gender: string) => {
+  selectedGender.value = gender;
+};
+
+// 初始化选中状态
+onMounted(() => {
+  if (props.relation) selectedRelation.value = props.relation;
+  if (props.gender) selectedGender.value = props.gender;
+});
+
+// 确认编辑
+const confirmEdit = async () => {
+  if (!selectedRelation.value || !selectedGender.value) {
+    Toast('请选择关系和性别');
+    return;
+  }
+  
+  try {
+    // 调用API更新数据
+    await DateService.updateDate({
+      id: props.id,
+      relation: selectedRelation.value,
+      gender: selectedGender.value
+    });
+    
+    // 触发事件更新父组件数据
+    emit('update:relation', selectedRelation.value);
+    emit('update:gender', selectedGender.value);
+    
+    // 由于我们使用了v-model:relation和v-model:gender，
+    // 父组件会通过props更新这些值，所以这里不需要额外操作
+    
+    Toast.success('更新成功');
+    showEditPopup.value = false;
+  } catch (error) {
+    console.error('更新失败:', error);
+    Toast.fail('更新失败');
+  }
+};
+
+// 处理箭头图标点击
+const handleArrowClick = (event: Event) => {
+  event.stopPropagation();
+  const date = new Date(props.solar);
+  const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+  // 跳转到首页并传递日期参数，同时设置JBottom的index为0
+  emit('click', { 
+    solar: props.solar, 
+    lunar: props.lunar,
+    route: {
+      path: '/',
+      query: { 
+        date: dateString
+      }
+    }
+  });
 };
 </script>
 
@@ -128,6 +274,55 @@ const handleStarClick = (event: Event) => {
 
 
 <style scoped>
+/* 弹窗样式 */
+.popup-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-header h3 {
+  margin: 0 auto;
+}
+
+.close-icon {
+  font-size: 20px;
+  color: #969799;
+}
+
+.popup-content {
+  padding: 8px 16px;
+}
+
+.card {
+  margin-bottom: 12px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.card h4 {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.popup-footer {
+  padding: 12px 16px;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f7f8fa;
+}
 .star-day-item {
   background-color: #fff;
   border-radius: 8px;
@@ -158,7 +353,7 @@ const handleStarClick = (event: Event) => {
   border-radius: 4px;
 }
 
-.star-icon {
+.edit-icon {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -179,6 +374,20 @@ const handleStarClick = (event: Event) => {
 .lunar-date {
   font-size: 14px;
   color: #666;
+}
+
+.relation-gender {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.relation-gender span {
+  background-color: #f5f5f5;
+  color: var(--van-primary-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .arrow-icon {

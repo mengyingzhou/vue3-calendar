@@ -18,6 +18,9 @@
           :lunar="day.lunar"
           :image-url="day.imageUrl"
           :is-starred="true"
+          v-model:relation="day.relation"
+          v-model:gender="day.gender"
+          :id="day.id"
           @click="onDayClick(day)"
           @toggle-star="onToggleStar(day)"
         />
@@ -30,6 +33,10 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import StarDayItem from '../components/StarDayItem.vue';
+import { DateService } from '@/utils/date';
+import { Solar, Lunar } from "lunar-typescript";
+import { Toast } from 'vant';
+import { wuxingFirstCharMap } from '../config/wuxing';
 
 const router = useRouter();
 
@@ -47,44 +54,13 @@ interface StarDay {
   solar: string | Date;
   lunar: LunarDate;
   imageUrl: string;
+  relation: string;
+  gender: string;
+  id?: string; // 添加id字段，用于删除收藏
 }
 
-// 模拟收藏日期数据
-const starDays = ref<StarDay[]>([
-  {
-    solar: new Date('1988-11-20T00:00:00.000Z'),
-    lunar: { 
-      date: '一九八八年 十月 十日', 
-      year: '戊辰', 
-      month: '甲戌', 
-      day: '乙酉',
-      hour: '辛酉' 
-    },
-    imageUrl: `https://picsum.photos/200/200?random=1`,
-  },
-  {
-    solar: new Date('2024-01-15T17:55:00.000Z'),
-    lunar: { 
-      date: '甲辰年 正月 初四', 
-      year: '甲辰', 
-      month: '辛丑', 
-      day: '戊申',
-      hour: '癸亥' 
-    },
-    imageUrl: `https://picsum.photos/200/200?random=2`,
-  },
-  {
-    solar: new Date('2024-07-24T17:55:00.000Z'),
-    lunar: { 
-      date: '甲辰年 六月 十九', 
-      year: '甲辰', 
-      month: '辛未', 
-      day: '己丑',
-      hour: '癸酉' 
-    },
-    imageUrl: `https://picsum.photos/200/200?random=3`,
-  },
-]);
+// 初始化空数组，将在onMounted中加载数据
+const starDays = ref<StarDay[]>([]);
 
 // 处理返回按钮点击
 const onClickLeft = () => {
@@ -93,24 +69,133 @@ const onClickLeft = () => {
 
 // 处理日期项点击
 const onDayClick = (day: StarDay) => {
-  // 这里可以实现跳转到日期详情页的逻辑
-  console.log('点击日期项:', day);
-  // 示例：router.push({ name: 'DayDetail', params: { date: day.solar.toString() } });
+  // 将日期对象转换为字符串格式
+  const date = new Date(day.solar);
+  const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  
+  // 跳转到首页并传递日期参数
+  router.push({ 
+    path: '/',
+    query: { date: dateString }
+  });
 };
 
 // 处理收藏状态切换
-const onToggleStar = (day: StarDay) => {
-  console.log('切换收藏状态:', day);
-  // 这里可以实现切换收藏状态的逻辑
-  // 例如调用API更新收藏状态
+const onToggleStar = async (day: StarDay) => {
+  try {
+    if (!day.id) {
+      console.error('收藏ID不存在');
+      return;
+    }
+    
+    // 显示加载提示
+    Toast.loading({
+      message: '处理中...',
+      forbidClick: true,
+    });
+    
+    // 调用API删除收藏
+    await DateService.deleteDate(day.id);
+    
+    // 从列表中移除该日期
+    starDays.value = starDays.value.filter(item => item.id !== day.id);
+    
+    Toast.success('已取消收藏');
+  } catch (error) {
+    console.error('取消收藏错误:', error);
+    Toast.fail('操作失败，请重试');
+  }
+};
+
+// 将日期字符串转换为Solar对象和Lunar对象
+const convertDateStringToSolarLunar = (dateString: string) => {
+  try {
+    // 解析日期字符串，格式如："2024-7-24 17:55:00"
+    const dateMatch = dateString.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})/)
+    
+    if (dateMatch) {
+      const year = parseInt(dateMatch[1]);
+      const month = parseInt(dateMatch[2]);
+      const day = parseInt(dateMatch[3]);
+      const hour = parseInt(dateMatch[4]);
+      const minute = parseInt(dateMatch[5]);
+      const second = parseInt(dateMatch[6]);
+      
+      // 创建Solar对象
+      const solar = Solar.fromYmdHms(year, month, day, hour, minute, second);
+      
+      // 获取对应的Lunar对象
+      const lunar = solar.getLunar();
+      console.log('转换后的日期:', lunar);
+      
+      return {
+        solar: solar.toYmdHms(),
+        lunar: {
+          date: `${lunar.getYearInChinese()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`,
+          year: lunar.getYearInGanZhi(),
+          month: lunar.getMonthInGanZhi(),
+          day: lunar.getDayInGanZhi(),
+          hour: lunar.getTimeInGanZhi()
+        },
+        imageUrl: wuxingFirstCharMap[lunar.getDayInGanZhi().charAt(0)]?.imageUrlStar
+      };
+    }
+    throw new Error('日期格式不正确');
+  } catch (error) {
+    console.error('日期转换错误:', error);
+    return null;
+  }
+};
+
+// 加载收藏日期数据
+const loadStarDays = async () => {
+  try {
+    // 显示加载提示
+    Toast.loading({
+      message: '加载中...',
+      forbidClick: true,
+    });
+    
+    // 获取当前用户ID
+    const user = localStorage.getItem('user');
+    if (!user) {
+      Toast.fail('请先登录');
+      router.push('/login');
+      return;
+    }
+
+    const userId = JSON.parse(user).id;    
+    const collections = await DateService.getDateCollections(userId);
+    
+    // 清空当前数组
+    starDays.value = [];
+    
+    // 转换收藏日期数据
+    collections.forEach(collection => {
+      const solarLunar = convertDateStringToSolarLunar(collection.dateString);
+      if (solarLunar) {
+        starDays.value.push({
+          solar: solarLunar.solar,
+          lunar: solarLunar.lunar,
+          imageUrl: solarLunar.imageUrl,
+          relation: collection.relation,
+          gender: collection.gender,
+          id: collection._id, // 保存收藏ID，用于后续删除操作
+        });
+      }
+    });
+
+    // 关闭加载提示
+    Toast.clear();
+  } catch (error) {
+    console.error('加载收藏日期错误:', error);
+    Toast.fail('加载失败，请重试');
+  }
 };
 
 // 生命周期钩子
 onMounted(() => {
-  // 这里可以添加页面加载时的逻辑
-  // 例如从API获取收藏日期数据
-  // TODO: 从后端API获取实际的收藏日期列表
-  console.log('StarDays页面已加载');
+  loadStarDays();
 });
 
 </script>
